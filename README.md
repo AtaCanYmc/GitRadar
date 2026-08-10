@@ -1,7 +1,7 @@
 # 📡 GitRadar
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/username/GitRadar/main/assets/gitradar-banner.png" alt="GitRadar Banner" width="700"/>
+  <img src="./assets/gitradar-banner.jpg" alt="GitRadar Banner" width="800"/>
 </p>
 
 <p align="center">
