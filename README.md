@@ -85,7 +85,22 @@ pip install -e .
 
 ---
 
-## 🔑 Configuration
+### 🌐 3. Launch Local Web Dashboard (`ui`)
+
+Launch an interactive web dashboard in your browser powered by Flask & AJAX:
+
+```bash
+gitradar ui --port 5000
+```
+
+Options:
+- `--port` / `-p`: Port to run the local server on (Default: `5000`)
+- `--host` / `-h`: Binding address (Default: `127.0.0.1`)
+- `--open / --no-open`: Automatically open browser tab (Default: `--open`)
+
+---
+
+### ⚙️ 4. Configuration (`config`)
 
 GitRadar requires a free **Groq API Key** for fast LLM inference (Llama 3.3 70B).
 

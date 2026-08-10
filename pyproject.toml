@@ -20,6 +20,7 @@ dependencies = [
     "pydantic-settings>=2.0.0",
     "python-dotenv>=1.0.0",
     "jinja2>=3.0.0",
+    "flask>=3.0.0",
 ]
 
 [project.optional-dependencies]
@@ -35,4 +36,4 @@ gitradar = "gitradar.cli:app"
 where = ["."]
 
 [tool.setuptools.package-data]
-gitradar = ["prompts/*.j2"]
+gitradar = ["prompts/*.j2", "web/templates/*.html", "web/static/**/*"]

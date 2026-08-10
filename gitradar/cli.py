@@ -1,4 +1,5 @@
 import asyncio
+import webbrowser
 from typing import Optional
 import typer
 from rich.console import Console
@@ -9,6 +10,7 @@ from gitradar.config import settings, save_setting
 from gitradar.services.github import GitHubService
 from gitradar.services.llm import LLMService
 from gitradar.utils import ui
+from gitradar.web import create_app
 
 app = typer.Typer(
     name="gitradar",
@@ -87,6 +89,27 @@ def search(
     except Exception as e:
         ui.display_error(f"GitHub Search Failed: {str(e)}")
         raise typer.Exit(code=1)
+
+
+@app.command(name="ui", help="🌐 Launches local GitRadar web dashboard in your browser.")
+def ui_command(
+    port: int = typer.Option(5000, "--port", "-p", help="Port to run the local web server on"),
+    host: str = typer.Option("127.0.0.1", "--host", "-h", help="Host address to bind the web server"),
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="Automatically open browser tab"),
+):
+    """Launch local Flask web application dashboard."""
+    ui.display_banner()
+    url = f"http://{host}:{port}"
+    console.print(f"[bold green]🚀 Launching GitRadar Web Dashboard at:[/bold green] [bold cyan]{url}[/bold cyan]")
+
+    if open_browser:
+        try:
+            webbrowser.open(url)
+        except Exception:
+            pass
+
+    flask_app = create_app()
+    flask_app.run(host=host, port=port, debug=False)
 
 
 @app.command(name="config", help="⚙️ View or configure GitRadar API credentials and preferences.")
