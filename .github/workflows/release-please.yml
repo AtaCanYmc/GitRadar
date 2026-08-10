@@ -17,10 +17,11 @@ jobs:
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
 
-      # Optional: Automatically build and publish to PyPI when a release is created
+      # Build and publish to PyPI when a release tag is created by Release Please
       - name: Checkout Code
         if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v4
