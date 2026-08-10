@@ -24,7 +24,7 @@ jobs:
       # Build and publish to PyPI when a release tag is created by Release Please
       - name: Checkout Code
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
         if: ${{ steps.release.outputs.release_created }}
