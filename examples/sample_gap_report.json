@@ -1,0 +1,45 @@
+{
+  "idea_summary": "AI tabanlı terminal ve Git hook kod inceleme ve refactoring aracı",
+  "market_saturation": "Orta",
+  "saturation_score": 45,
+  "market_summary": "Terminal bazlı Git araçları ve AI kod inceleme repoları son yıllarda hızlı büyüme göstermektedir. Ancak yerel LLM desteği ve anlık Groq çıkarımı olan CLI araçları kategorisi henüz doygunluğa ulaşmamıştır.",
+  "top_competitors": [
+    {
+      "repo_name": "owner/ai-code-reviewer",
+      "key_strengths": [
+        "Popüler GitHub Action desteği",
+        "OpenAI API entegrasyonu"
+      ],
+      "weaknesses_or_gaps": [
+        "Yüksek API gecikme süresi",
+        "Terminal interaktif arayüzü eksik"
+      ]
+    },
+    {
+      "repo_name": "dev/git-ai-hooks",
+      "key_strengths": [
+        "Kolay git-hook kurulumu"
+      ],
+      "weaknesses_or_gaps": [
+        "Sadece tek dil desteği var",
+        "Özelleştirilebilir kural motoru yok"
+      ]
+    }
+  ],
+  "unmet_needs": [
+    "Büyük diff dosyalarında düşük gecikme süresiyle anlık yanıt alma",
+    "İnternet bağlantısı olmadan yerel LLM (Ollama/Llama.cpp) fall-back desteği",
+    "Gelişmiş Rich terminal UI ile diff içi görsel vurgulama"
+  ],
+  "differentiators": [
+    "Groq Llama 3 entegrasyonu sayesinde alt-saniye yanıt süreleri",
+    "Açık kaynak kural motoru ve yerel konfigürasyon esnekliği",
+    "Renkli ve zengin terminal panelleri ile geliştirici deneyimi"
+  ],
+  "actionable_recommendations": [
+    "1. İlk olarak Typer ve Rich ile hızlı bir terminal prototipi oluşturun.",
+    "2. Groq ve Ollama hibrit sağlayıcı mimarisini ilk günden kurun.",
+    "3. Geliştiricilerin projelerine tek komutla `.pre-commit-config.yaml` eklemesini sağlayın."
+  ],
+  "opportunity_score": 85
+}
