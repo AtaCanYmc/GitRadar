@@ -12,17 +12,17 @@ from gitradar.utils import ui
 
 app = typer.Typer(
     name="gitradar",
-    help="📡 GitRadar: GitHub Market & Gap Analysis CLI Tool driven by AI & GitHub REST API.",
+    help="📡 GitRadar: GitHub Market & Gap Analysis CLI tool driven by AI & GitHub REST API.",
     add_completion=False,
 )
 console = Console()
 
 
-@app.command(name="analyze", help="💡 Bir proje fikrini analiz eder, ilgili repoları tarar ve Pazar & Gap Raporu oluşturur.")
+@app.command(name="analyze", help="💡 Analyze a project idea, scan candidate repos, and generate a Market & Gap Report.")
 def analyze(
-    idea: str = typer.Argument(..., help="Analiz edilecek proje fikri (örn: 'AI tabanlı terminal kod inceleme aracı')"),
-    limit: int = typer.Option(10, "--limit", "-l", help="Taranacak ve analize dahil edilecek maksimum repo sayısı"),
-    model: Optional[str] = typer.Option(None, "--model", "-m", help="Kullanılacak LiteLLM modeli (Varsayılan: groq/llama-3.3-70b-versatile)"),
+    idea: str = typer.Argument(..., help="Project idea to analyze (e.g. 'AI code review tool for git hooks')"),
+    limit: int = typer.Option(10, "--limit", "-l", help="Maximum repositories to fetch and evaluate"),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="Override LiteLLM model (Default: groq/llama-3.3-70b-versatile)"),
 ):
     """Run full AI-driven market and gap analysis workflow on a project idea."""
     ui.display_banner()
@@ -32,13 +32,13 @@ def analyze(
         github_service = GitHubService()
 
         # Step 1: Query Expansion with LLM
-        with Status("[bold cyan]🧠 Proje fikri LLM ile analiz ediliyor ve arama terimleri türetiliyor...[/bold cyan]", spinner="dots"):
+        with Status("[bold cyan]🧠 Analyzing project idea with LLM & deriving search strategy...[/bold cyan]", spinner="dots"):
             queries = llm_service.expand_idea_to_queries(idea)
         
         ui.display_query_strategy(queries)
 
         # Step 2: GitHub Search & Enrichment
-        with Status(f"[bold cyan]🔍 GitHub API üzerinden repolar taranıyor (Maks: {limit})...[/bold cyan]", spinner="earth"):
+        with Status(f"[bold cyan]🔍 Scanning GitHub repositories via REST API (Max: {limit})...[/bold cyan]", spinner="earth"):
             repos = asyncio.run(
                 github_service.search_and_enrich(
                     keywords=queries.search_keywords,
@@ -48,13 +48,13 @@ def analyze(
             )
 
         if not repos:
-            ui.display_error("Arama sonucunda hiç ilgili repository bulunamadı. Lütfen fikrinizi daha farklı terimlerle ifade etmeyi deneyin.")
+            ui.display_error("No relevant repositories found. Try phrasing your project idea with different terms.")
             raise typer.Exit(code=1)
 
-        ui.display_repo_table(repos, title=f"'{idea}' İle İlişkili Bulunan GitHub Repoları")
+        ui.display_repo_table(repos, title=f"Repositories Related to '{idea}'")
 
         # Step 3: Semantic Gap Analysis with LLM
-        with Status("[bold cyan]🎯 Bulunan repolar semantik olarak puanlanıyor ve Pazar & Gap Analizi Raporu hazırlanıyor...[/bold cyan]", spinner="bouncingBar"):
+        with Status("[bold cyan]🎯 Semantically evaluating candidate repos & synthesizing Market & Gap Report...[/bold cyan]", spinner="bouncingBar"):
             report = llm_service.analyze_market_and_gaps(idea, repos)
 
         # Step 4: Display Final Report
@@ -64,37 +64,37 @@ def analyze(
         ui.display_error(str(ve))
         raise typer.Exit(code=1)
     except Exception as e:
-        ui.display_error(f"Beklenmeyen bir hata oluştu: {str(e)}")
+        ui.display_error(f"An unexpected error occurred: {str(e)}")
         raise typer.Exit(code=1)
 
 
-@app.command(name="search", help="🔍 GitHub REST API üzerinden hızlı repository araması yapar.")
+@app.command(name="search", help="🔍 Perform a quick standalone GitHub repository search.")
 def search(
-    query: str = typer.Argument(..., help="GitHub üzerinde aranacak terim veya sorgu"),
-    limit: int = typer.Option(10, "--limit", "-l", help="Getirilecek sonuç sayısı"),
-    sort: str = typer.Option("stars", "--sort", "-s", help="Sıralama ölçütü (stars, forks, updated)"),
+    query: str = typer.Argument(..., help="Search query string or keywords"),
+    limit: int = typer.Option(10, "--limit", "-l", help="Maximum repositories to return"),
+    sort: str = typer.Option("stars", "--sort", "-s", help="Sort field (stars, forks, updated)"),
 ):
     """Fast standalone repository search without LLM synthesis."""
     ui.display_banner()
     github_service = GitHubService()
 
     try:
-        with Status(f"[bold cyan]🔍 GitHub'da '{query}' aranıyor...[/bold cyan]", spinner="dots"):
+        with Status(f"[bold cyan]🔍 Searching GitHub for '{query}'...[/bold cyan]", spinner="dots"):
             repos = asyncio.run(github_service.search_repositories(query, limit=limit, sort=sort))
 
-        ui.display_repo_table(repos, title=f"Arama Sonuçları: '{query}'")
+        ui.display_repo_table(repos, title=f"Search Results: '{query}'")
 
     except Exception as e:
-        ui.display_error(f"GitHub Araması Başarısız: {str(e)}")
+        ui.display_error(f"GitHub Search Failed: {str(e)}")
         raise typer.Exit(code=1)
 
 
-@app.command(name="config", help="⚙️ GitRadar API anahtarları ve tercihlerini görüntüler veya yapılandırır.")
+@app.command(name="config", help="⚙️ View or configure GitRadar API credentials and preferences.")
 def config_command(
-    show: bool = typer.Option(False, "--show", help="Mevcut yapılandırmayı göster"),
-    groq_api_key: Optional[str] = typer.Option(None, "--groq-api-key", help="Groq API Key değerini kaydet"),
-    github_token: Optional[str] = typer.Option(None, "--github-token", help="GitHub Access Token değerini kaydet"),
-    default_model: Optional[str] = typer.Option(None, "--model", help="Varsayılan LiteLLM modelini kaydet"),
+    show: bool = typer.Option(False, "--show", help="Display current configuration"),
+    groq_api_key: Optional[str] = typer.Option(None, "--groq-api-key", help="Save Groq API Key credential"),
+    github_token: Optional[str] = typer.Option(None, "--github-token", help="Save GitHub Access Token credential"),
+    default_model: Optional[str] = typer.Option(None, "--model", help="Save default LiteLLM model identifier"),
 ):
     """Manage GitRadar configuration."""
     ui.display_banner()
@@ -102,31 +102,30 @@ def config_command(
     updated = False
     if groq_api_key:
         save_setting("GROQ_API_KEY", groq_api_key)
-        ui.display_info("GROQ_API_KEY başarıyla kaydedildi! 🔑")
+        ui.display_info("GROQ_API_KEY successfully saved! 🔑")
         updated = True
 
     if github_token:
         save_setting("GITHUB_TOKEN", github_token)
-        ui.display_info("GITHUB_TOKEN başarıyla kaydedildi! 🐙")
+        ui.display_info("GITHUB_TOKEN successfully saved! 🐙")
         updated = True
 
     if default_model:
         save_setting("DEFAULT_MODEL", default_model)
-        ui.display_info(f"Varsayılan model '{default_model}' olarak kaydedildi! 🤖")
+        ui.display_info(f"Default model saved as '{default_model}'! 🤖")
         updated = True
 
     if show or not updated:
-        # Load fresh settings
         curr_settings = settings
-        grid = ui.Table(title="⚙️ Mevcut GitRadar Yapılandırması", header_style="bold yellow", expand=True)
-        grid.add_column("Parametre", style="bold cyan")
-        grid.add_column("Değer", style="white")
+        grid = ui.Table(title="⚙️ Current GitRadar Configuration", header_style="bold yellow", expand=True)
+        grid.add_column("Parameter", style="bold cyan")
+        grid.add_column("Value", style="white")
 
         groq_val = curr_settings.groq_api_key
-        masked_groq = f"{groq_val[:6]}...{groq_val[-4:]}" if groq_val and len(groq_val) > 10 else ("Tanımlı" if groq_val else "[red]Tanımlanmamış[/red]")
+        masked_groq = f"{groq_val[:6]}...{groq_val[-4:]}" if groq_val and len(groq_val) > 10 else ("Configured" if groq_val else "[red]Not Configured[/red]")
 
         gh_val = curr_settings.github_token
-        masked_gh = f"{gh_val[:4]}...{gh_val[-4:]}" if gh_val and len(gh_val) > 8 else ("Tanımlı (Anonim Mod)" if not gh_val else "Tanımlı")
+        masked_gh = f"{gh_val[:4]}...{gh_val[-4:]}" if gh_val and len(gh_val) > 8 else ("Configured (Anonymous Mode)" if not gh_val else "Configured")
 
         grid.add_row("GROQ_API_KEY", masked_groq)
         grid.add_row("GITHUB_TOKEN", masked_gh)
@@ -136,11 +135,11 @@ def config_command(
         console.print(grid)
 
 
-@app.command(name="version", help="ℹ️ GitRadar sürüm bilgisini gösterir.")
+@app.command(name="version", help="ℹ️ Display GitRadar version information.")
 def version():
     """Display CLI version."""
     ui.display_banner()
-    console.print(f"[bold cyan]GitRadar CLI Sürümü:[/bold cyan] [bold white]v{__version__}[/bold white]")
+    console.print(f"[bold cyan]GitRadar CLI Version:[/bold cyan] [bold white]v{__version__}[/bold white]")
 
 
 def main():

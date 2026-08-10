@@ -1,45 +1,45 @@
 {
-  "idea_summary": "AI tabanlı terminal ve Git hook kod inceleme ve refactoring aracı",
-  "market_saturation": "Orta",
+  "idea_summary": "AI powered terminal and Git hook code review and refactoring tool",
+  "market_saturation": "Moderate",
   "saturation_score": 45,
-  "market_summary": "Terminal bazlı Git araçları ve AI kod inceleme repoları son yıllarda hızlı büyüme göstermektedir. Ancak yerel LLM desteği ve anlık Groq çıkarımı olan CLI araçları kategorisi henüz doygunluğa ulaşmamıştır.",
+  "market_summary": "Terminal-based Git tools and AI code review repositories have experienced rapid growth. However, CLI tools featuring local LLM fallback and sub-second Groq inference are not yet saturated.",
   "top_competitors": [
     {
       "repo_name": "owner/ai-code-reviewer",
       "key_strengths": [
-        "Popüler GitHub Action desteği",
-        "OpenAI API entegrasyonu"
+        "Popular GitHub Action integration",
+        "OpenAI API support"
       ],
       "weaknesses_or_gaps": [
-        "Yüksek API gecikme süresi",
-        "Terminal interaktif arayüzü eksik"
+        "High API latency",
+        "Lacks interactive terminal UI"
       ]
     },
     {
       "repo_name": "dev/git-ai-hooks",
       "key_strengths": [
-        "Kolay git-hook kurulumu"
+        "Easy git-hook installation"
       ],
       "weaknesses_or_gaps": [
-        "Sadece tek dil desteği var",
-        "Özelleştirilebilir kural motoru yok"
+        "Supports single programming language only",
+        "No custom rule engine"
       ]
     }
   ],
   "unmet_needs": [
-    "Büyük diff dosyalarında düşük gecikme süresiyle anlık yanıt alma",
-    "İnternet bağlantısı olmadan yerel LLM (Ollama/Llama.cpp) fall-back desteği",
-    "Gelişmiş Rich terminal UI ile diff içi görsel vurgulama"
+    "Instant feedback on large git diffs with ultra-low latency",
+    "Offline local LLM (Ollama / Llama.cpp) fallback support when offline",
+    "Rich interactive terminal visual diff highlighting"
   ],
   "differentiators": [
-    "Groq Llama 3 entegrasyonu sayesinde alt-saniye yanıt süreleri",
-    "Açık kaynak kural motoru ve yerel konfigürasyon esnekliği",
-    "Renkli ve zengin terminal panelleri ile geliştirici deneyimi"
+    "Sub-second response latency leveraging Groq Llama 3 inference",
+    "Extensible open-source rules engine with local configuration support",
+    "Rich color-coded developer-centric terminal experience"
   ],
   "actionable_recommendations": [
-    "1. İlk olarak Typer ve Rich ile hızlı bir terminal prototipi oluşturun.",
-    "2. Groq ve Ollama hibrit sağlayıcı mimarisini ilk günden kurun.",
-    "3. Geliştiricilerin projelerine tek komutla `.pre-commit-config.yaml` eklemesini sağlayın."
+    "1. Build a fast terminal MVP using Typer and Rich.",
+    "2. Implement a hybrid Groq and Ollama provider architecture from day one.",
+    "3. Enable single-command `.pre-commit-config.yaml` setup for developer repos."
   ],
   "opportunity_score": 85
 }

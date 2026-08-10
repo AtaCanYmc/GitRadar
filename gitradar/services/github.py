@@ -40,11 +40,11 @@ class GitHubService:
             
             if response.status_code == 403:
                 raise RuntimeError(
-                    "GitHub API Oran Sınırı (Rate Limit) Aşıldı. "
-                    "Lütfen GITHUB_TOKEN ayarlayın (`gitradar config --github-token YOUR_TOKEN`)."
+                    "GitHub API Rate Limit Exceeded. "
+                    "Please configure a GITHUB_TOKEN (`gitradar config --github-token YOUR_TOKEN`)."
                 )
             elif response.status_code != 200:
-                raise RuntimeError(f"GitHub API Hatası ({response.status_code}): {response.text}")
+                raise RuntimeError(f"GitHub API Error ({response.status_code}): {response.text}")
 
             data = response.json()
             items = data.get("items", [])
@@ -56,10 +56,10 @@ class GitHubService:
                     name=item.get("name", ""),
                     owner=item.get("owner", {}).get("login", ""),
                     html_url=item.get("html_url", ""),
-                    description=item.get("description") or "Açıklama bulunmuyor",
+                    description=item.get("description") or "No description provided",
                     stars=item.get("stargazers_count", 0),
                     forks=item.get("forks_count", 0),
-                    language=item.get("language") or "Belirtilmemiş",
+                    language=item.get("language") or "Unspecified",
                     topics=item.get("topics", []),
                     updated_at=item.get("updated_at", "")[:10] if item.get("updated_at") else "",
                     open_issues=item.get("open_issues_count", 0),
@@ -78,7 +78,6 @@ class GitHubService:
                 response = await client.get(url, headers=headers)
                 if response.status_code == 200:
                     text = response.text
-                    # Clean markdown code blocks / trim text
                     cleaned = text.strip()
                     return cleaned[:max_chars] + "..." if len(cleaned) > max_chars else cleaned
             except Exception:
@@ -98,12 +97,9 @@ class GitHubService:
         """
         all_repos: Dict[str, RepositoryInfo] = {}
 
-        # 1. Build queries
         queries = []
         if keywords:
-            # Combined keyword query
             queries.append(" ".join(keywords[:4]))
-            # Individual key phrases
             for kw in keywords[:3]:
                 if kw not in queries:
                     queries.append(kw)
@@ -112,7 +108,6 @@ class GitHubService:
             for topic in topics[:2]:
                 queries.append(f"topic:{topic}")
 
-        # 2. Run searches concurrently
         tasks = [self.search_repositories(q, limit=limit) for q in queries]
         search_results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -122,10 +117,8 @@ class GitHubService:
                     if repo.full_name not in all_repos:
                         all_repos[repo.full_name] = repo
 
-        # 3. Sort by star count descending
         sorted_repos = sorted(all_repos.values(), key=lambda r: r.stars, reverse=True)[:limit]
 
-        # 4. Fetch README snippets concurrently for top repos if requested
         if fetch_readmes and sorted_repos:
             readme_tasks = [
                 self.fetch_readme_snippet(repo.owner, repo.name)

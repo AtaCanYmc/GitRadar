@@ -5,7 +5,6 @@ from rich.table import Table
 from rich.text import Text
 from rich.columns import Columns
 from rich.markdown import Markdown
-from rich.style import Style
 from gitradar.models import ExpandedQueries, GapAnalysisReport, RepositoryInfo
 
 console = Console()
@@ -30,17 +29,17 @@ def display_query_strategy(queries: ExpandedQueries) -> None:
     table.add_column("Key", style="bold yellow")
     table.add_column("Value", style="cyan")
 
-    table.add_row("🔍 Anahtar Kelimeler:", ", ".join(queries.search_keywords))
+    table.add_row("🔍 Search Keywords:", ", ".join(queries.search_keywords))
     if queries.github_topics:
-        table.add_row("🏷️ GitHub Konuları:", ", ".join(f"#{t}" for t in queries.github_topics))
+        table.add_row("🏷️ GitHub Topics:", ", ".join(f"#{t}" for t in queries.github_topics))
     if queries.target_languages:
-        table.add_row("💻 Önerilen Diller:", ", ".join(queries.target_languages))
-    table.add_row("💡 Arama Stratejisi:", queries.search_explanation)
+        table.add_row("💻 Target Languages:", ", ".join(queries.target_languages))
+    table.add_row("💡 Search Strategy:", queries.search_explanation)
 
     console.print(
         Panel(
             table,
-            title="[bold green]🧠 LLM Arama Stratejisi Türetildi[/bold green]",
+            title="[bold green]🧠 LLM Search Strategy Generated[/bold green]",
             border_style="green",
             expand=True,
         )
@@ -48,14 +47,14 @@ def display_query_strategy(queries: ExpandedQueries) -> None:
     console.print()
 
 
-def display_repo_table(repositories: List[RepositoryInfo], title: str = "Taranan İlgili GitHub Repoları") -> None:
+def display_repo_table(repositories: List[RepositoryInfo], title: str = "Relevant GitHub Repositories Found") -> None:
     """Display repositories in a Rich styled table."""
     if not repositories:
-        console.print("[bold red]Hiç ilgili repository bulunamadı.[/bold red]")
+        console.print("[bold red]No relevant repositories found.[/bold red]")
         return
 
     table = Table(
-        title=f"📊 {title} ({len(repositories)} Repo)",
+        title=f"📊 {title} ({len(repositories)} Repos)",
         header_style="bold magenta",
         border_style="dim white",
         expand=True,
@@ -63,11 +62,11 @@ def display_repo_table(repositories: List[RepositoryInfo], title: str = "Taranan
 
     table.add_column("#", justify="center", style="dim", width=3)
     table.add_column("Repository", style="bold cyan", no_wrap=True)
-    table.add_column("Yıldız ⭐", justify="right", style="bold yellow")
-    table.add_column("Fork 🍴", justify="right", style="dim cyan")
-    table.add_column("Dil 💻", style="green")
-    table.add_column("Son Güncelleme 📅", justify="center", style="dim")
-    table.add_column("Açıklama", style="white")
+    table.add_column("Stars ⭐", justify="right", style="bold yellow")
+    table.add_column("Forks 🍴", justify="right", style="dim cyan")
+    table.add_column("Language 💻", style="green")
+    table.add_column("Last Updated 📅", justify="center", style="dim")
+    table.add_column("Description", style="white")
 
     for idx, repo in enumerate(repositories, 1):
         desc = repo.description or ""
@@ -92,29 +91,29 @@ def display_gap_report(report: GapAnalysisReport) -> None:
     """Display comprehensive Market & Gap Analysis Report in terminal UI."""
     console.print()
     console.print("[bold cyan]════════════════════════════════════════════════════════════════════════════════[/bold cyan]")
-    console.print("  🎯 [bold white on blue] PAZAR & EKSİK NOKTA (GAP) ANALİZİ RAPORU [/bold white on blue]")
+    console.print("  🎯 [bold white on blue] MARKET & GAP ANALYSIS REPORT [/bold white on blue]")
     console.print("[bold cyan]════════════════════════════════════════════════════════════════════════════════[/bold cyan]")
     console.print()
 
     # 1. Summary & Market Saturation Gauge
-    sat_color = "green" if report.market_saturation == "Düşük" else ("yellow" if report.market_saturation == "Orta" else "red")
+    sat_color = "green" if report.market_saturation in ["Düşük", "Low"] else ("yellow" if report.market_saturation in ["Orta", "Moderate"] else "red")
     
     summary_text = (
-        f"[bold white]Proje Fikri Özeti:[/bold white] {report.idea_summary}\n\n"
-        f"[bold white]Pazar Doluluk Oranı:[/bold white] [{sat_color}]{report.market_saturation}[/{sat_color}] "
-        f"(Doluluk Skoru: [bold]{report.saturation_score}/100[/bold]) | "
-        f"[bold white]Fırsat Potansiyeli:[/bold white] [bold green]{report.opportunity_score}/100 🚀[/bold green]\n\n"
-        f"[bold white]Pazar Özeti:[/bold white]\n{report.market_summary}"
+        f"[bold white]Project Idea Summary:[/bold white] {report.idea_summary}\n\n"
+        f"[bold white]Market Saturation:[/bold white] [{sat_color}]{report.market_saturation}[/{sat_color}] "
+        f"(Saturation Score: [bold]{report.saturation_score}/100[/bold]) | "
+        f"[bold white]Opportunity Score:[/bold white] [bold green]{report.opportunity_score}/100 🚀[/bold green]\n\n"
+        f"[bold white]Market Summary:[/bold white]\n{report.market_summary}"
     )
-    console.print(Panel(summary_text, title="[bold yellow]📌 Pazar Özeti & Doygunluk Derecesi[/bold yellow]", border_style=sat_color))
+    console.print(Panel(summary_text, title="[bold yellow]📌 Market Overview & Saturation Gauge[/bold yellow]", border_style=sat_color))
     console.print()
 
     # 2. Key Competitors
     if report.top_competitors:
-        comp_table = Table(title="🏆 Öne Çıkan Rakipler & Analizleri", header_style="bold blue", expand=True)
-        comp_table.add_column("Rakip Repo", style="bold cyan", width=25)
-        comp_table.add_column("Güçlü Yönleri (Strengths)", style="green")
-        comp_table.add_column("Zayıf Yönleri & Açıkları (Gaps)", style="red")
+        comp_table = Table(title="🏆 Top Competitors & Analysis", header_style="bold blue", expand=True)
+        comp_table.add_column("Competitor Repo", style="bold cyan", width=25)
+        comp_table.add_column("Key Strengths", style="green")
+        comp_table.add_column("Weaknesses & Gaps", style="red")
 
         for comp in report.top_competitors:
             strengths = "\n".join(f"• {s}" for s in comp.key_strengths)
@@ -124,20 +123,20 @@ def display_gap_report(report: GapAnalysisReport) -> None:
         console.print(comp_table)
         console.print()
 
-    # 3. Unmet Needs & Differentiators side-by-side or stacked
-    unmet_md = "### 🚨 Mevcut Ekosistemdeki Eksiklikler (Unmet Needs / Gaps)\n"
+    # 3. Unmet Needs & Differentiators
+    unmet_md = "### 🚨 Unmet Needs & Ecosystem Gaps\n"
     for gap in report.unmet_needs:
         unmet_md += f"- ❌ **{gap}**\n"
 
-    diff_md = "### 💎 Projenizi Farklılaştıracak Noktalar (Differentiators)\n"
+    diff_md = "### 💎 Key Differentiators\n"
     for diff in report.differentiators:
         diff_md += f"- ✨ **{diff}**\n"
 
     console.print(
         Columns(
             [
-                Panel(Markdown(unmet_md), border_style="red", title="[bold red]Açık Noktalar (Gaps)[/bold red]", expand=True),
-                Panel(Markdown(diff_md), border_style="green", title="[bold green]Fark Yaratacak Fırsatlar[/bold green]", expand=True),
+                Panel(Markdown(unmet_md), border_style="red", title="[bold red]Unmet Needs (Gaps)[/bold red]", expand=True),
+                Panel(Markdown(diff_md), border_style="green", title="[bold green]Key Differentiators[/bold green]", expand=True),
             ],
             equal=True,
         )
@@ -145,17 +144,17 @@ def display_gap_report(report: GapAnalysisReport) -> None:
     console.print()
 
     # 4. Actionable Recommendations
-    rec_md = "### 💡 Geliştirici İçin Stratejik Tavsiyeler\n"
+    rec_md = "### 💡 Strategic Developer Recommendations\n"
     for idx, rec in enumerate(report.actionable_recommendations, 1):
         rec_md += f"**{idx}.** {rec}\n"
 
-    console.print(Panel(Markdown(rec_md), title="[bold cyan]🛠️ Aksiyon Planı & Tavsiyeler[/bold cyan]", border_style="cyan"))
+    console.print(Panel(Markdown(rec_md), title="[bold cyan]🛠️ Action Plan & Recommendations[/bold cyan]", border_style="cyan"))
     console.print()
 
 
 def display_error(message: str) -> None:
     """Print an error panel."""
-    console.print(Panel(f"[bold red]HATA:[/bold red] {message}", title="❌ İşlem Başarısız", border_style="red"))
+    console.print(Panel(f"[bold red]ERROR:[/bold red] {message}", title="❌ Operation Failed", border_style="red"))
 
 
 def display_info(message: str) -> None:
