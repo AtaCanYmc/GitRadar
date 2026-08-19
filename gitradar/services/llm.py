@@ -3,10 +3,15 @@ import os
 import re
 from typing import List, Optional
 import httpx
+import litellm
 from litellm import completion, NotFoundError, BadRequestError
 from gitradar.config import settings
 from gitradar.models import ExpandedQueries, GapAnalysisReport, RepositoryInfo
 from gitradar.prompts import render_prompt
+
+# Suppress LiteLLM verbose logs and feedback prompts in terminal UI
+litellm.suppress_debug_info = True
+litellm.set_verbose = False
 
 KNOWN_FALLBACKS = [
     "groq/openai/gpt-oss-120b",
