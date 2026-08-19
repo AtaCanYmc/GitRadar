@@ -1,66 +1,67 @@
 # 📡 GitRadar
 
 <p align="center">
-  <img src="./assets/gitradar-banner.jpg" alt="GitRadar Banner" width="800"/>
+  <img src="./assets/gitradar-banner.jpg" alt="GitRadar Banner" width="850"/>
 </p>
 
 <p align="center">
-  <b>Smart GitHub Market & Gap Analysis CLI Tool Driven by AI & GitHub REST API</b>
+  <b>Smart GitHub Market & Gap Analysis Tool Driven by AI & GitHub REST API</b><br>
+  <i>Validate your developer project ideas in seconds — via Rich Terminal CLI or Interactive Web Dashboard.</i>
 </p>
 
 <p align="center">
-  <a href="https://github.com/username/GitRadar/actions"><img src="https://img.shields.io/github/actions/workflow/status/username/GitRadar/ci.yml?branch=main&style=flat-square&logo=github" alt="CI Status"></a>
+  <a href="https://github.com/username/GitRadar/actions"><img src="https://img.shields.io/github/actions/workflow/status/username/GitRadar/ci.yml?branch=main&style=flat-square&logo=github&label=CI" alt="CI Status"></a>
   <a href="https://pypi.org/project/gitradar/"><img src="https://img.shields.io/pypi/v/gitradar?style=flat-square&color=blue&logo=pypi" alt="PyPI Version"></a>
   <a href="https://pypi.org/project/gitradar/"><img src="https://img.shields.io/pypi/pyversions/gitradar?style=flat-square&logo=python" alt="Python Versions"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/username/GitRadar?style=flat-square" alt="License"></a>
+  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square" alt="Code Style: Black"></a>
 </p>
 
 ---
 
 ## 💡 What is GitRadar?
 
-**GitRadar** is an open-source Command Line Interface (CLI) tool designed for software developers, founders, and open-source creators. 
+**GitRadar** is an open-source tool designed for developers, open-source creators, and tech founders to perform instant **Market & Gap Analysis** on software project ideas.
 
-Before spending weeks building a new side-project or open-source tool, **GitRadar** analyzes your idea directly from your terminal. It expands your prompt into intelligent GitHub search queries, scans existing repositories via the GitHub REST API, semantically evaluates competitor repos using **LiteLLM** (Groq / Llama 3), and renders an executive **Market & Gap Analysis Report** right inside your terminal.
+Before writing code for a new side project or open-source tool, GitRadar helps you answer critical questions:
+- *What open-source repositories already exist for this concept?*
+- *What features or capabilities are current repos missing (unmet market needs)?*
+- *What unique differentiators will make your project stand out?*
+
+GitRadar expands your raw idea into intelligent GitHub queries, fetches candidate repositories via the GitHub REST API, semantically analyzes competitors using **LiteLLM** & **Groq** (with automatic model discovery), and renders an executive report in your terminal or inside a local **Web Dashboard**.
 
 ---
 
 ## ✨ Key Features
 
-- 🧠 **AI Query Expansion**: Translates raw developer project ideas into optimized GitHub search queries, keywords, and topic tags (`#cli`, `#ai`, `#devtools`).
-- ⚡ **Async GitHub Repository Scanning**: Concurrently fetches repository metadata, star/fork counts, topic tags, and README snippets via `httpx`.
-- 🎯 **Semantic Gap Analysis**: Synthesizes market saturation levels, top competitor strengths/weaknesses, unmet developer needs, and unique differentiators.
-- 🎨 **Rich Visual UX**: Renders color-coded status gauges, styled tables, Markdown panels, and progress spinners using `rich`.
-- ⚙️ **Simple API Management**: Easily set and save your `GROQ_API_KEY` and optional `GITHUB_TOKEN` using `gitradar config`.
+- 🧠 **AI Query Expansion**: Translates raw developer ideas into optimized search keywords, language filters, and GitHub topic tags (`#cli`, `#ai`, `#devtools`).
+- ⚡ **Async GitHub Repository Scanner**: Concurrently fetches metadata, star/fork counts, topic tags, and README snippets via `httpx`.
+- 🎯 **Semantic Gap Analysis**: Synthesizes market saturation levels, top competitor strengths/weaknesses, ecosystem gaps, and strategic recommendations.
+- 🌐 **Interactive Web Dashboard (`gitradar ui`)**: Built with Flask, featuring a glassmorphic dark theme, AJAX search, live progress indicators, and visual metric gauges.
+- 🎨 **Rich Terminal UX**: Beautiful CLI output with color-coded status badges, formatted tables, Markdown panels, and suppressed debug log noise.
+- 📄 **Jinja2 Prompt Engine**: All LLM prompts are stored as decoupled `.j2` templates in `gitradar/prompts/` for easy customization.
+- 🔄 **Dynamic Model Discovery**: Queries Groq API model endpoints dynamically to select active models (`groq/openai/gpt-oss-120b`, `groq/qwen/qwen3.6-27b`, `groq/llama-3.1-8b-instant`) with automatic fallback resiliency.
 
 ---
 
-## 🛠️ System Architecture
+## 🛠️ Architecture Overview
 
-```text
-                                  +-----------------------+
-                                  |   User Project Idea   |
-                                  +-----------+-----------+
-                                              |
-                                              v
-                                  +-----------------------+
-                                  | LLM Query Expansion   | (LiteLLM / Groq)
-                                  +-----------+-----------+
-                                              |
-                                              v
-                                  +-----------------------+
-                                  | GitHub Async Scanner  | (httpx REST API)
-                                  +-----------+-----------+
-                                              |
-                                              v
-                                  +-----------------------+
-                                  | LLM Gap & Opportunity | (Semantic Analysis)
-                                  +-----------+-----------+
-                                              |
-                                              v
-                                  +-----------------------+
-                                  |  Rich Terminal UX     | (Panels, Tables, Gauges)
-                                  +-----------------------+
+```mermaid
+graph TD
+    UserPrompt["User Project Idea Prompt"] --> CLI["CLI Interface (gitradar analyze / Typer)"]
+    UserPrompt --> WebUI["Web Dashboard (gitradar ui / Flask)"]
+
+    CLI --> LLM["LLM Service (LiteLLM + Groq API)"]
+    WebUI --> LLM
+
+    CLI --> GH["GitHub REST API Service (httpx)"]
+    WebUI --> GH
+
+    LLM --> Prompts["Jinja2 Prompt Engine (gitradar/prompts)"]
+    LLM --> Fallback["Dynamic Groq Model Discovery & Fallback"]
+
+    GH --> Output["Executive Market & Gap Report"]
+    LLM --> Output
 ```
 
 ---
@@ -69,52 +70,37 @@ Before spending weeks building a new side-project or open-source tool, **GitRada
 
 ### Installation
 
-Install GitRadar directly from PyPI (or locally in editable mode):
+Install GitRadar from PyPI or locally:
 
 ```bash
 pip install gitradar
 ```
 
-Or install from source:
+Or install from source in editable mode:
 
 ```bash
 git clone https://github.com/username/GitRadar.git
 cd GitRadar
-pip install -e .
+pip install -e ".[dev]"
 ```
 
 ---
 
-### 🌐 3. Launch Local Web Dashboard (`ui`)
+## 🔑 Configuration
 
-Launch an interactive web dashboard in your browser powered by Flask & AJAX:
+GitRadar uses **Groq** for ultra-fast LLM inference.
 
-```bash
-gitradar ui --port 5000
-```
-
-Options:
-- `--port` / `-p`: Port to run the local server on (Default: `5000`)
-- `--host` / `-h`: Binding address (Default: `127.0.0.1`)
-- `--open / --no-open`: Automatically open browser tab (Default: `--open`)
-
----
-
-### ⚙️ 4. Configuration (`config`)
-
-GitRadar requires a free **Groq API Key** for fast LLM inference (Llama 3.3 70B).
-
-1. Set your Groq API Key:
+1. **Set your Groq API Key**:
    ```bash
    gitradar config --groq-api-key "gsk_your_groq_api_key_here"
    ```
 
-2. *(Optional)* Add a GitHub Personal Access Token to boost rate limits from 60 to 5,000 requests/hour:
+2. *(Optional)* **Set a GitHub Token** to boost API rate limits (from 60 to 5,000 requests/hour):
    ```bash
    gitradar config --github-token "ghp_your_github_token_here"
    ```
 
-3. View your active configuration:
+3. **Inspect Active Settings**:
    ```bash
    gitradar config --show
    ```
@@ -123,9 +109,9 @@ GitRadar requires a free **Groq API Key** for fast LLM inference (Llama 3.3 70B)
 
 ## 💻 CLI Commands & Usage
 
-### 💡 `gitradar analyze <IDEA>`
+### 💡 1. `gitradar analyze <IDEA>`
 
-Runs full AI-driven market and gap analysis workflow on a project idea.
+Executes the full end-to-end AI market and gap analysis workflow in the terminal:
 
 ```bash
 gitradar analyze "AI powered code review tool for terminal and git hooks"
@@ -133,34 +119,26 @@ gitradar analyze "AI powered code review tool for terminal and git hooks"
 
 **Options:**
 - `--limit` / `-l`: Maximum repositories to evaluate (Default: `10`)
-- `--model` / `-m`: Override default LiteLLM model (Default: `groq/llama-3.3-70b-versatile`)
-
-**Sample Terminal Output Preview:**
-
-```text
-╭───────────────────────────────────────────────────────╮
-│ 📡 GitRadar  CLI Market & Gap Analysis Tool  [v0.1.0] │
-╰───────────────────────────────────────────────────────╯
-
-🧠 LLM Search Strategy Generated:
-  • Keywords: code review, git hooks, ai code review
-  • Topics: #code-review, #git-hooks, #llm
-  • Languages: Python, Rust
-
-📊 Relevant Repositories Found (Top 5):
-  1. owner/ai-reviewer (⭐ 4,200) - AI git hook reviewer
-  2. dev/git-check    (⭐ 1,850) - Automated PR inspector
-
-🎯 MARKET & GAP ANALYSIS REPORT
-  • Market Saturation: Moderate (Saturation Score: 45/100)
-  • Opportunity Score: 85/100 🚀
-  • Unmet Needs: Lack of offline local LLM fallback, high latency on large diffs
-  • Differentiators: Real-time interactive terminal UI, instant Groq inference
-```
+- `--model` / `-m`: Override LLM model (e.g. `groq/openai/gpt-oss-120b`, `groq/qwen/qwen3.6-27b`)
 
 ---
 
-### 🔍 `gitradar search <QUERY>`
+### 🌐 2. `gitradar ui`
+
+Launches the local interactive web dashboard in your default browser:
+
+```bash
+gitradar ui --port 5000
+```
+
+**Options:**
+- `--port` / `-p`: Web server port (Default: `5000`)
+- `--host` / `-h`: Binding host address (Default: `127.0.0.1`)
+- `--open / --no-open`: Automatically open browser tab (Default: `--open`)
+
+---
+
+### 🔍 3. `gitradar search <QUERY>`
 
 Performs a fast, direct GitHub repository search without LLM synthesis:
 
@@ -170,9 +148,9 @@ gitradar search "terminal devtools" --limit 5 --sort stars
 
 ---
 
-### ⚙️ `gitradar config`
+### ⚙️ 4. `gitradar config`
 
-View or update CLI settings and credentials:
+View or update credentials and preferences:
 
 ```bash
 gitradar config --show
@@ -180,9 +158,9 @@ gitradar config --show
 
 ---
 
-### ℹ️ `gitradar version`
+### ℹ️ 5. `gitradar version`
 
-Prints the current version of GitRadar:
+Displays version information:
 
 ```bash
 gitradar version
@@ -190,26 +168,58 @@ gitradar version
 
 ---
 
-## 🧪 Running Tests
+## 🐍 Python SDK Usage
 
-GitRadar uses `pytest` for testing:
+You can import GitRadar services directly in custom Python scripts:
+
+```python
+import asyncio
+from gitradar.services.github import GitHubService
+from gitradar.services.llm import LLMService
+
+async def main():
+    idea = "AI automated documentation generator"
+    
+    github_service = GitHubService()
+    llm_service = LLMService()
+
+    # 1. Expand idea into search keywords
+    queries = llm_service.expand_idea_to_queries(idea)
+
+    # 2. Fetch candidate repos
+    repos = await github_service.search_and_enrich(
+        keywords=queries.search_keywords,
+        topics=queries.github_topics,
+        limit=5,
+    )
+
+    # 3. Synthesize Market & Gap Report
+    report = llm_service.analyze_market_and_gaps(idea, repos)
+    print("Market Saturation:", report.market_saturation)
+    print("Opportunity Score:", report.opportunity_score)
+
+asyncio.run(main())
+```
+
+---
+
+## 🧪 Testing
+
+GitRadar uses `pytest` for unit and integration testing:
 
 ```bash
-pip install -e ".[dev]"
 pytest
 ```
 
 ---
 
-## 🤝 Contributing
+## 📚 Documentation Index
 
-Contributions are welcome! Please read our [CONTRIBUTING.md](./CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for guidelines on submitting pull requests, reporting issues, and setup instructions.
-
----
-
-## 🛡️ Security
-
-If you discover a security vulnerability within GitRadar, please consult our [SECURITY.md](./SECURITY.md) policy for disclosure procedures.
+- [ARCHITECTURE.md](./ARCHITECTURE.md): Deep-dive into technical design, dynamic model resolution, and Jinja2 prompt engine.
+- [CONTRIBUTING.md](./CONTRIBUTING.md): Guidelines for submitting PRs, coding standards, and conventional commits.
+- [SECURITY.md](./SECURITY.md): Security policy and vulnerability disclosure procedures.
+- [CHANGELOG.md](./CHANGELOG.md): Semantic release history.
+- [examples/README.md](./examples/README.md): Sample scripts and JSON report schemas.
 
 ---
 

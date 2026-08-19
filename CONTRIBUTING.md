@@ -1,6 +1,6 @@
 # Contributing to GitRadar 📡
 
-Thank you for your interest in contributing to **GitRadar**! We welcome contributions from developers of all skill levels. Whether you are fixing a bug, improving documentation, adding new features, or optimizing LLM prompts, your efforts are appreciated.
+Thank you for your interest in contributing to **GitRadar**! We welcome contributions from developers of all skill levels. Whether you are fixing a bug, adding new prompt templates, building Web UI components, or improving documentation, your efforts are appreciated.
 
 ---
 
@@ -12,8 +12,6 @@ By participating in this project, you agree to abide by our [Code of Conduct](./
 
 ## 🛠️ Development Setup
 
-To set up a local development environment for GitRadar:
-
 ### 1. Fork & Clone the Repository
 
 ```bash
@@ -21,14 +19,14 @@ git clone https://github.com/YOUR_USERNAME/GitRadar.git
 cd GitRadar
 ```
 
-### 2. Create a Virtual Environment
+### 2. Create & Activate Virtual Environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-### 3. Install in Editable Mode with Dev Dependencies
+### 3. Install Editable Package with Dev Dependencies
 
 ```bash
 pip install -e ".[dev]"
@@ -36,52 +34,50 @@ pip install -e ".[dev]"
 
 ---
 
-## 🧪 Running Tests
+## 🧪 Running Tests & Validation
 
-Ensure all unit tests pass before opening a Pull Request:
+Ensure all unit tests pass before submitting a Pull Request:
 
 ```bash
 pytest
 ```
 
-To run tests with detailed verbosity:
+---
 
-```bash
-pytest -vv
-```
+## 💡 Adding New Prompt Templates
+
+GitRadar decouples LLM prompt logic into Jinja2 templates:
+1. Add or edit `.j2` template files in `gitradar/prompts/`.
+2. Add a corresponding test case in `tests/test_prompts.py` to verify template rendering.
 
 ---
 
-## 🎨 Coding Standards & Guidelines
+## 🌐 Extending the Web Dashboard
 
-- **Python Version**: Write clean Python 3.10+ code.
-- **Type Annotations**: Use type hints for function arguments and return values wherever applicable.
-- **Style Conventions**: Follow [PEP 8](https://peps.python.org/pep-0008/) naming and formatting standards.
-- **Data Models**: Use Pydantic `BaseModel` for structured data definitions.
-- **Error Handling**: Gracefully catch network timeouts, API rate limits, and missing configuration settings, presenting user-friendly messages via `gitradar.utils.ui`.
+The web dashboard is powered by Flask:
+1. Backend routes are located in `gitradar/web/app.py`.
+2. HTML templates are in `gitradar/web/templates/`.
+3. Static CSS and JS assets are in `gitradar/web/static/`.
+4. Add route tests in `tests/test_web.py`.
+
+---
+
+## 📝 Conventional Commit Format
+
+GitRadar uses **Release Please** for automated release management. All commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+- `feat(cli): add new interactive option` (Minor release bump `0.1.0` -> `0.2.0`)
+- `fix(llm): resolve fallback model parsing error` (Patch release bump `0.1.0` -> `0.1.1`)
+- `docs(readme): update architectural diagram`
+- `chore(deps): update litellm dependency`
 
 ---
 
 ## 🔄 Pull Request Guidelines
 
-1. **Create a Feature Branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-2. **Commit Your Changes**: Keep commits atomic and descriptive.
-   ```bash
-   git commit -m "feat(services): add fallback search mechanism"
-   ```
-3. **Push to Your Fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-4. **Open a Pull Request**: Provide a clear description of the problem solved or feature added. Reference any relevant GitHub issues.
-
----
-
-## 💬 Getting Help
-
-If you have questions or need guidance, feel free to open a [GitHub Discussion](https://github.com/username/GitRadar/discussions) or create an issue.
+1. Create a descriptive feature branch (`git checkout -b feature/your-feature-name`).
+2. Keep commits atomic with conventional commit messages.
+3. Verify test suite passes (`pytest`).
+4. Submit your Pull Request targeting the `main` branch.
 
 Happy Coding! 🚀

@@ -1,90 +1,122 @@
 # GitRadar Technical Architecture 🏛️
 
-This document outlines the technical design, component hierarchy, data flow, and design patterns used in **GitRadar**.
+This document outlines the software architecture, component relationships, data flow pipelines, and resiliency strategies of **GitRadar**.
 
 ---
 
-## 📐 System Architecture Overview
+## 📐 High-Level Architectural Pattern
 
-GitRadar follows a modular, layer-decoupled architecture designed for speed, extensibility, and maintainability.
+GitRadar adopts a modular, layer-decoupled architecture separating **Presentation** (Terminal CLI & Web UI), **Domain Services** (GitHub REST API & LLM Orchestration), **Prompt Engine** (Jinja2 Templates), and **Persistence** (Pydantic Settings).
 
 ```mermaid
 graph TD
-    CLI["CLI Layer (gitradar.cli / Typer)"] --> Config["Config Manager (gitradar.config / Pydantic Settings)"]
-    CLI --> UI["UI Presentation Layer (gitradar.utils.ui / Rich)"]
-    CLI --> LLM["LLM Orchestration (gitradar.services.llm / LiteLLM)"]
-    CLI --> GitHub["GitHub API Service (gitradar.services.github / httpx)"]
+    subgraph PresentationLayer["Presentation Layer"]
+        CLI["Typer CLI (gitradar.cli)"]
+        WebUI["Flask Web App (gitradar.web)"]
+        RichUI["Rich Terminal Renderer (gitradar.utils.ui)"]
+    end
+
+    subgraph ServiceLayer["Service Layer"]
+        LLM["LLM Service (gitradar.services.llm)"]
+        GH["GitHub Service (gitradar.services.github)"]
+    end
+
+    subgraph DataLayer["Data & Prompt Layer"]
+        Prompts["Jinja2 Prompt Engine (gitradar.prompts)"]
+        Models["Pydantic Schemas (gitradar.models)"]
+        Config["Config Manager (gitradar.config)"]
+    end
+
+    subgraph ExternalAPIs["External APIs"]
+        GroqAPI["Groq REST API (LLM Inference)"]
+        GitHubAPI["GitHub REST API (v3)"]
+    end
+
+    CLI --> LLM
+    CLI --> GH
+    CLI --> RichUI
     
-    LLM --> |Structured Prompts| Groq["Groq API / Llama 3"]
-    GitHub --> |Async HTTP Requests| GHAPI["GitHub REST API"]
-    
-    LLM --> Models["Data Models (gitradar.models / Pydantic)"]
-    GitHub --> Models
+    WebUI --> LLM
+    WebUI --> GH
+
+    LLM --> Prompts
+    LLM --> GroqAPI
+    LLM --> Models
+
+    GH --> GitHubAPI
+    GH --> Models
+
+    Config --> CLI
+    Config --> WebUI
+    Config --> LLM
+    Config --> GH
 ```
 
 ---
 
-## 📦 Component Breakdown
+## 📦 Component Details
 
-### 1. CLI Layer (`gitradar/cli.py`)
-- **Framework**: `typer`
-- **Responsibility**: Orchestrates CLI commands (`analyze`, `search`, `config`, `version`). Captures user inputs, triggers async event loops, coordinates service calls, and manages application status spinners.
+### 1. Presentation Layer
+- **CLI (`gitradar/cli.py`)**: Built on `typer`. Defines commands (`analyze`, `ui`, `search`, `config`, `version`), manages options/arguments, handles async runtime execution via `asyncio.run()`, and controls terminal status spinners.
+- **Web UI (`gitradar/web/`)**: Built on `flask`. Hosts a local single-page web dashboard (`/`), JSON REST endpoints (`/api/analyze`, `/api/search`, `/api/config`), and serves static assets (`style.css` glassmorphism styling, `app.js` AJAX handler).
+- **Rich UI (`gitradar/utils/ui.py`)**: Renders stylized terminal banners, query strategy panels, colored repository tables, and Markdown gap report panels.
 
-### 2. Configuration & Settings (`gitradar/config.py`)
-- **Framework**: `pydantic-settings`, `python-dotenv`
-- **Responsibility**: Manages environment variables and persistent configuration files (`~/.config/gitradar/config.env`). Automatically masks sensitive credentials when rendered in the terminal.
+### 2. Service Layer & Resiliency
+- **GitHub Service (`gitradar/services/github.py`)**: Asynchronous HTTP client built with `httpx`. Executes concurrent keyword/topic searches via `asyncio.gather`, deduplicates repositories, handles rate limiting (HTTP 403), and enriches top candidates with README snippets.
+- **LLM Service (`gitradar/services/llm.py`)**: Integrates LiteLLM with Groq models. Features:
+  - **Dynamic Groq Model Discovery**: Interrogates `https://api.groq.com/openai/v1/models` to discover active text models available for the user's API key.
+  - **Fallback Execution**: Automatically tries primary model -> discovered active Groq models -> known fallback models.
+  - **Dual Mode JSON Handling**: Tries `response_format={"type": "json_object"}` first; if rejected by provider server-side validation, retries in standard completion mode and parses content using `extract_json()`.
+  - **Noise Suppression**: Sets `litellm.suppress_debug_info = True` and `litellm.set_verbose = False` to prevent terminal log pollution.
 
-### 3. GitHub API Service (`gitradar/services/github.py`)
-- **Framework**: `httpx` (async)
-- **Responsibility**: Interacts with the GitHub REST API (`/search/repositories`, `/repos/{owner}/{repo}/readme`).
-- **Features**:
-  - Asynchronous parallel search queries (`asyncio.gather`).
-  - Rate limit detection (HTTP status 403 handling).
-  - Enrichment of top candidate repositories with README text snippets.
-
-### 4. LLM Orchestration Service (`gitradar/services/llm.py`)
-- **Framework**: `litellm`
-- **Default Provider**: Groq (`groq/llama-3.3-70b-versatile`)
-- **Responsibility**:
-  - **Task 1 (Query Expansion)**: Converts raw user prompts into structured JSON objects containing search keywords, GitHub topic tags, and programming language targets.
-  - **Task 2 (Semantic Analysis)**: Receives enriched repository summaries and generates structured `GapAnalysisReport` objects (market saturation index, top competitors, unmet needs, differentiators, recommendations).
-
-### 5. UI Presentation Layer (`gitradar/utils/ui.py`)
-- **Framework**: `rich`
-- **Responsibility**: Formats tables, panels, progress indicators, status spinners, markdown blocks, and warning callouts.
+### 3. Prompt Engine (`gitradar/prompts/`)
+- Uses `jinja2.Environment` and `FileSystemLoader`.
+- Decouples prompt engineering from Python code.
+- Templates:
+  - `query_expansion_system.j2` / `query_expansion_user.j2`
+  - `gap_analysis_system.j2` / `gap_analysis_user.j2`
 
 ---
 
-## 🔄 Sequence Flow (`gitradar analyze`)
+## 🔄 End-to-End Sequence Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User
-    participant CLI as CLI (gitradar.cli)
-    participant LLM as LLM Service (LiteLLM)
-    participant GH as GitHub Service (httpx)
-    participant UI as Rich UI Renderer
+    participant App as CLI / Web UI
+    participant LLM as LLMService
+    participant GH as GitHubService
+    participant Groq as Groq API
+    participant GHREST as GitHub REST API
 
-    User->>CLI: gitradar analyze "Idea prompt"
-    CLI->>UI: Render Banner & Status Spinner
-    CLI->>LLM: expand_idea_to_queries("Idea prompt")
-    LLM-->>CLI: ExpandedQueries (keywords, topics)
-    CLI->>UI: Render Query Strategy Panel
+    User->>App: Input idea prompt
+    App->>LLM: expand_idea_to_queries(idea)
+    LLM->>Groq: Render Jinja2 prompt & query LLM
+    Groq-->>LLM: JSON (keywords, topics)
+    LLM-->>App: ExpandedQueries object
     
-    CLI->>GH: search_and_enrich(keywords, topics)
-    GH-->>CLI: List[RepositoryInfo] (Enriched with READMEs)
-    CLI->>UI: Render Repositories Table
+    App->>GH: search_and_enrich(keywords, topics)
+    GH->>GHREST: GET /search/repositories (Parallel)
+    GHREST-->>GH: Raw repo metadata
+    GH->>GHREST: GET /repos/{owner}/{repo}/readme
+    GHREST-->>GH: README snippets
+    GH-->>App: Enriched RepositoryInfo list
     
-    CLI->>LLM: analyze_market_and_gaps(idea, repos)
-    LLM-->>CLI: GapAnalysisReport
-    CLI->>UI: Render Market & Gap Report Panels
+    App->>LLM: analyze_market_and_gaps(idea, repos)
+    LLM->>Groq: Render Jinja2 gap template & query LLM
+    Groq-->>LLM: JSON Gap Report
+    LLM-->>App: GapAnalysisReport object
+    App-->>User: Render Rich Terminal Panels / Web UI Dashboard
 ```
 
 ---
 
-## 🛡️ Error Handling & Resiliency
+## 🛡️ Error & Exception Matrix
 
-1. **Missing API Keys**: If `GROQ_API_KEY` is not found, the LLM service raises a `ValueError` caught by the CLI, presenting a actionable `gitradar config --groq-api-key` instruction.
-2. **GitHub Rate Limits**: Without a `GITHUB_TOKEN`, unauthenticated GitHub searches are capped at 60 requests/hour. HTTP 403 responses trigger a helpful prompt advising the user to add a GitHub token.
-3. **LLM Output Validation**: Structured responses use `response_format={"type": "json_object"}` and are validated against Pydantic schema models to prevent parsing exceptions.
+| Failure Mode | Component | Handling & Fallback Strategy |
+| --- | --- | --- |
+| Missing `GROQ_API_KEY` | `LLMService` | Raises friendly `ValueError` guiding user to `gitradar config --groq-api-key`. |
+| GitHub API Rate Limit (HTTP 403) | `GitHubService` | Catches status code and prompts user to set `GITHUB_TOKEN`. |
+| Groq Model Not Found | `LLMService` | Dynamically queries `/v1/models` and falls back to active alternative models. |
+| Server-side JSON Validate Failed | `LLMService` | Retries without `response_format` constraint and uses robust `extract_json()` regex parser. |
