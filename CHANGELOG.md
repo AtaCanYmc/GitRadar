@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.0...v0.1.1) (2026-08-19)
+
+
+### Documentation
+
+* update architecture and contributing documentation for clarity and detail ([594974f](https://github.com/AtaCanYmc/GitRadar/commit/594974fe99ededbede3d1b06f4a18afc8456f9cb))
+
 ## [0.1.0] - 2026-08-10
 
 ### Added
