@@ -9,12 +9,7 @@
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "extra-files": [
-        {
-          "type": "regex",
-          "path": "gitradar/__init__.py",
-          "pattern": "__version__ = \"(.*)\"",
-          "replacement": "__version__ = \"${version}\""
-        }
+        "gitradar/__init__.py"
       ]
     }
   }
