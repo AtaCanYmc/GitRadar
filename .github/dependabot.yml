@@ -9,7 +9,6 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
-      include: "scope"
 
   # Maintain dependencies for GitHub Actions workflows
   - package-ecosystem: "github-actions"
@@ -20,4 +19,3 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps-actions)"
-      include: "scope"
