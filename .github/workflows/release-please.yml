@@ -21,14 +21,14 @@ jobs:
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
 
-      # Build and publish to PyPI when a release tag is created by Release Please
+      # Build and publish to PyPI automatically when a Release PR is merged by Release Please
       - name: Checkout Code
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Python
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
