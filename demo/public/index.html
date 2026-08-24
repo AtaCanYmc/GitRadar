@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitRadar - Developer Market & Gap Analysis (Vercel Web Demo)</title>
+  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="GitRadar" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <a href="/" class="logo-container">
+        <div class="logo-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path>
+            <path d="M12 18a6 6 0 1 0 6-6"></path>
+            <circle cx="12" cy="12" r="2"></circle>
+            <path d="M12 2v4"></path>
+          </svg>
+        </div>
+        <span class="logo-text">GitRadar</span>
+        <span class="logo-badge">Web Demo</span>
+      </a>
+
+      <div class="nav-controls">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          <span data-i18n="engine_active">Engine Active</span>
+        </div>
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="tr">TR</button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg id="theme-moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg id="theme-sun-icon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <!-- Settings Modal Button -->
+        <button id="open-settings-btn" class="theme-toggle-btn" title="Settings" aria-label="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+
+        <nav class="nav-tabs">
+          <button class="nav-tab active" id="tab-analyze-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span data-i18n="tab_market">Market Analysis</span>
+          </button>
+          <button class="nav-tab" id="tab-search-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span data-i18n="tab_search">Repository Search</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Form Section -->
+    <section class="card" id="analyze-section">
+      <div class="card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <h2 class="card-title" data-i18n="analyze_title">Developer Project Idea Analysis</h2>
+      </div>
+      <p class="card-subtitle" data-i18n="analyze_desc">
+        Enter your developer tool concept. GitRadar expands query terms, scans live GitHub repositories via REST API, and synthesizes competitive market gaps.
+      </p>
+      
+      <div class="search-box">
+        <div class="input-container">
+          <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="idea-input" class="input-field" placeholder="e.g. AI-powered terminal code review and git diff analyzer..." />
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <div class="chips-label" data-i18n="quick_prompts">Quick Prompts:</div>
+            <div class="chips-container">
+              <span class="chip" data-prompt="Terminal AI code review tool for git diffs" data-i18n-chip="chip1">Terminal AI Reviewer</span>
+              <span class="chip" data-prompt="Kubernetes log analyzer and error explainer CLI" data-i18n-chip="chip2">K8s Log Explainer</span>
+              <span class="chip" data-prompt="Rust-based git hook security credential scanner" data-i18n-chip="chip3">Rust Git Credential Scanner</span>
+            </div>
+          </div>
+          <button id="analyze-btn" class="btn-primary">
+            <span data-i18n="run_analysis">Run Market Analysis</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Standalone Quick Search Section -->
+    <section class="card hidden" id="search-section">
+      <div class="card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <h2 class="card-title" data-i18n="search_title">Direct GitHub Search</h2>
+      </div>
+      <p class="card-subtitle" data-i18n="search_desc">
+        Execute direct GitHub REST API queries to retrieve repository star counts, forks, and details.
+      </p>
+      
+      <div class="search-box">
+        <div class="input-container">
+          <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" class="input-field" placeholder="e.g. terminal devtools, git hooks, rust cli..." />
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button id="quick-search-btn" class="btn-primary">
+            <span data-i18n="search_repos">Search Repositories</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Radar Loading Sweep Visualizer -->
+    <div id="loading" class="card radar-loading-card">
+      <div class="radar-sweep-container">
+        <div class="radar-crosshair-h"></div>
+        <div class="radar-crosshair-v"></div>
+        <div class="radar-grid-ring inner"></div>
+        <div class="radar-sweep-line"></div>
+      </div>
+      <div id="loading-status" class="loading-status-text" data-i18n="loading_status">Synthesizing Search Strategy...</div>
+      <div class="loading-subtext" data-i18n="loading_subtext">Fetching active GitHub repositories & evaluating market saturation</div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="error-box" class="card hidden" style="border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08);">
+      <div class="card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3 class="card-title" style="color: var(--accent-rose);" data-i18n="error_title">Analysis Failed</h3>
+      </div>
+      <p id="error-message" style="margin-top: 0.35rem; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.875rem;"></p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results" class="hidden">
+      <!-- Export Actions Header -->
+      <div class="export-actions-bar">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);" data-i18n="export_report_label">Export Report</span>
+        </div>
+        <div class="export-btn-group">
+          <button id="export-md-btn" class="export-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span data-i18n="btn_export_md">Export Markdown (.md)</span>
+          </button>
+          <button id="export-json-btn" class="export-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span data-i18n="btn_export_json">Export JSON (.json)</span>
+          </button>
+          <button id="copy-report-btn" class="export-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="copy-btn-text" data-i18n="btn_copy_report">Copy Report</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Derived AI Strategy Panel -->
+      <section class="card" id="strategy-panel">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <h3 class="card-title" style="color: var(--accent-cyan);" data-i18n="strategy_title">Synthesized Query Strategy</h3>
+        </div>
+        <div id="strategy-content"></div>
+      </section>
+
+      <!-- Executive Metrics Overview -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label" data-i18n="opp_score">Opportunity Score</span>
+            <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg>
+          </div>
+          <div class="metric-value-wrap">
+            <div id="metric-opportunity" class="metric-value" style="color: var(--accent-emerald);">85</div>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">/ 100</span>
+          </div>
+          <div class="progress-bar-container">
+            <div id="opp-bar-fill" class="progress-bar-fill" style="width: 85%; background: var(--accent-emerald);"></div>
+          </div>
+          <div class="metric-hint" data-i18n="opp_hint">Market viability rating</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label" data-i18n="sat_score">Market Saturation</span>
+            <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line></svg>
+          </div>
+          <div class="metric-value-wrap">
+            <div id="metric-saturation" class="metric-value" style="color: var(--accent-amber);">Moderate</div>
+          </div>
+          <div class="progress-bar-container">
+            <div id="sat-bar-fill" class="progress-bar-fill" style="width: 50%; background: var(--accent-amber);"></div>
+          </div>
+          <div id="metric-sat-score" class="metric-hint">Saturation index: 50/100</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label" data-i18n="repos_analyzed">Repositories Analyzed</span>
+            <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          <div class="metric-value-wrap">
+            <div id="metric-repos-count" class="metric-value" style="color: var(--accent-blue);">10</div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: 100%; background: var(--accent-blue);"></div>
+          </div>
+          <div class="metric-hint" data-i18n="repos_hint">GitHub API candidates verified</div>
+        </div>
+      </div>
+
+      <!-- Market Summary Panel -->
+      <section class="card">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <h3 class="card-title" data-i18n="market_synthesis">Market Synthesis</h3>
+        </div>
+        <p id="market-summary-text" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.925rem;"></p>
+      </section>
+
+      <!-- Repositories Inventory Table -->
+      <section class="card">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          <h3 class="card-title" data-i18n="discovered_repos">Discovered Candidate Repositories</h3>
+        </div>
+        <div class="table-wrapper">
+          <table id="repos-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th data-i18n="th_repo">Repository</th>
+                <th data-i18n="th_stars">Stars</th>
+                <th data-i18n="th_forks">Forks</th>
+                <th data-i18n="th_lang">Language</th>
+                <th data-i18n="th_updated">Updated</th>
+                <th data-i18n="th_desc">Description</th>
+              </tr>
+            </thead>
+            <tbody id="repos-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Competitors Grid -->
+      <section class="card">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-indigo)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <h3 class="card-title" data-i18n="competitors_title">Top Competitor Profile Breakdown</h3>
+        </div>
+        <div id="competitor-grid" class="comp-grid"></div>
+      </section>
+
+      <!-- Gaps vs Differentiators -->
+      <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+        <div class="card" style="border-color: rgba(244, 63, 94, 0.25);">
+          <div class="card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            <h3 class="card-title" style="color: var(--accent-rose);" data-i18n="unmet_title">Unmet Market Needs</h3>
+          </div>
+          <div id="unmet-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;"></div>
+        </div>
+
+        <div class="card" style="border-color: rgba(16, 185, 129, 0.25);">
+          <div class="card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <h3 class="card-title" style="color: var(--accent-emerald);" data-i18n="diff_title">Key Differentiators</h3>
+          </div>
+          <div id="diff-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;"></div>
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <section class="card" style="border-color: rgba(59, 130, 246, 0.25);">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          <h3 class="card-title" style="color: var(--accent-blue);" data-i18n="rec_title">Strategic Action Items</h3>
+        </div>
+        <div id="rec-list" style="margin-top: 0.75rem;"></div>
+      </section>
+
+      <!-- Implementation Architecture & Open Source Tools -->
+      <section id="implementation-section" class="card hidden" style="border-color: rgba(99, 102, 241, 0.25);">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-indigo)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <h3 class="card-title" style="color: var(--accent-indigo);" data-i18n="tech_guide_title">Technical Implementation & Open-Source Roadmap</h3>
+        </div>
+        
+        <div style="margin-top: 0.75rem;">
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;" data-i18n="recommended_stack_label">Recommended Tech Stack</div>
+            <div id="tech-stack-badges" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;" data-i18n="arch_overview_label">Architecture Overview</div>
+            <p id="arch-overview-text" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;"></p>
+          </div>
+
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;" data-i18n="open_source_blocks_label">Recommended Open-Source Building Blocks</div>
+            <div id="open-source-tools-list" class="comp-grid"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <h3 class="modal-title" data-i18n="settings_title">Configuration Settings</h3>
+        </div>
+        <button id="close-settings-btn" class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" data-i18n="setting_report_lang">AI Response Language</label>
+          <select id="setting-report-lang-select" class="form-select">
+            <option value="English">English</option>
+            <option value="Turkish">Türkçe</option>
+            <option value="Spanish">Español</option>
+            <option value="German">Deutsch</option>
+            <option value="French">Français</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="setting_model">LLM Model</label>
+          <select id="setting-model-select" class="form-select">
+            <option value="groq/openai/gpt-oss-120b">groq/openai/gpt-oss-120b (Default)</option>
+            <option value="groq/qwen/qwen3.6-27b">groq/qwen/qwen3.6-27b</option>
+            <option value="groq/llama-3.3-70b-versatile">groq/llama-3.3-70b-versatile</option>
+            <option value="groq/llama-3.1-8b-instant">groq/llama-3.1-8b-instant</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="setting_limit">Max Repositories to Analyze</label>
+          <input type="number" id="setting-limit-input" class="input-field" min="5" max="30" value="10" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="setting_groq_key">Groq API Key</label>
+          <input type="password" id="setting-groq-key" class="input-field" placeholder="gsk_..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="setting_github_token">GitHub Access Token (Optional)</label>
+          <input type="password" id="setting-github-token" class="input-field" placeholder="ghp_..." />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="cancel-settings-btn" class="nav-btn" data-i18n="btn_cancel">Cancel</button>
+        <button id="save-settings-btn" class="btn-primary" data-i18n="btn_save">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -45,12 +45,26 @@ def create_app() -> Flask:
         model = data.get("model") or settings.default_model
         language = data.get("language") or settings.default_language
 
+        # Extract user credentials from headers or JSON payload
+        groq_key = (
+            request.headers.get("X-Groq-Api-Key")
+            or data.get("groq_key")
+            or data.get("groqKey")
+            or settings.groq_api_key
+        )
+        github_token = (
+            request.headers.get("X-Github-Token")
+            or data.get("github_token")
+            or data.get("githubToken")
+            or settings.github_token
+        )
+
         if not idea:
             return jsonify({"error": "Project idea parameter is required."}), 400
 
         try:
-            llm_service = LLMService(model=model, language=language)
-            github_service = GitHubService()
+            llm_service = LLMService(api_key=groq_key, model=model, language=language)
+            github_service = GitHubService(token=github_token)
 
             # 1. Expand Queries
             queries = llm_service.expand_idea_to_queries(idea, language=language)
@@ -82,11 +96,18 @@ def create_app() -> Flask:
         query = data.get("query", "").strip()
         limit = int(data.get("limit", 10))
 
+        github_token = (
+            request.headers.get("X-Github-Token")
+            or data.get("github_token")
+            or data.get("githubToken")
+            or settings.github_token
+        )
+
         if not query:
             return jsonify({"error": "Search query parameter is required."}), 400
 
         try:
-            github_service = GitHubService()
+            github_service = GitHubService(token=github_token)
             repos = asyncio.run(github_service.search_repositories(query, limit=limit))
             return jsonify({
                 "repositories": [r.model_dump() for r in repos]
