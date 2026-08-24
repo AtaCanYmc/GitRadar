@@ -14,6 +14,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const errorMessage = document.getElementById('error-message');
   const results = document.getElementById('results');
 
+  // Settings Modal Elements
+  const settingsModal = document.getElementById('settings-modal');
+  const openSettingsBtn = document.getElementById('open-settings-btn');
+  const closeSettingsBtn = document.getElementById('close-settings-btn');
+  const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+  const saveSettingsBtn = document.getElementById('save-settings-btn');
+
+  const settingModelSelect = document.getElementById('setting-model-select');
+  const settingLimitInput = document.getElementById('setting-limit-input');
+  const settingGroqKey = document.getElementById('setting-groq-key');
+  const settingGithubToken = document.getElementById('setting-github-token');
+
+  // Load Settings from LocalStorage
+  let customSettings = JSON.parse(localStorage.getItem('gitradar_settings') || '{}');
+
+  function populateSettingsModal() {
+    if (customSettings.model) settingModelSelect.value = customSettings.model;
+    if (customSettings.limit) settingLimitInput.value = customSettings.limit;
+    if (customSettings.groqKey) settingGroqKey.value = customSettings.groqKey;
+    if (customSettings.githubToken) settingGithubToken.value = customSettings.githubToken;
+  }
+
+  openSettingsBtn.addEventListener('click', () => {
+    populateSettingsModal();
+    settingsModal.classList.remove('hidden');
+  });
+
+  function closeSettings() {
+    settingsModal.classList.add('hidden');
+  }
+
+  closeSettingsBtn.addEventListener('click', closeSettings);
+  cancelSettingsBtn.addEventListener('click', closeSettings);
+
+  settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) closeSettings();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !settingsModal.classList.contains('hidden')) {
+      closeSettings();
+    }
+  });
+
+  saveSettingsBtn.addEventListener('click', () => {
+    customSettings = {
+      model: settingModelSelect.value,
+      limit: parseInt(settingLimitInput.value, 10) || 10,
+      groqKey: settingGroqKey.value.trim(),
+      githubToken: settingGithubToken.value.trim(),
+    };
+    localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
+    closeSettings();
+  });
+
   // Theme Controls
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const themeMoonIcon = document.getElementById('theme-moon-icon');
@@ -84,6 +139,13 @@ document.addEventListener('DOMContentLoaded', () => {
       unmet_title: "Unmet Market Needs",
       diff_title: "Key Differentiators",
       rec_title: "Strategic Action Items",
+      settings_title: "Configuration Settings",
+      setting_model: "LLM Model",
+      setting_limit: "Max Repositories to Analyze",
+      setting_groq_key: "Groq API Key",
+      setting_github_token: "GitHub Access Token (Optional)",
+      btn_cancel: "Cancel",
+      btn_save: "Save Settings",
     },
     tr: {
       engine_active: "Servis Aktif",
@@ -128,6 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
       unmet_title: "Karşılanmayan Pazar İhtiyaçları",
       diff_title: "Öne Çıkan Farklılaştırıcılar",
       rec_title: "Stratejik Öneriler",
+      settings_title: "Yapılandırma Ayarları",
+      setting_model: "LLM Modeli",
+      setting_limit: "Analiz Edilecek Maks. Depo Sayısı",
+      setting_groq_key: "Groq API Anahtarı",
+      setting_github_token: "GitHub Erişim Jetonu (İsteğe Bağlı)",
+      btn_cancel: "İptal",
+      btn_save: "Ayarları Kaydet",
     }
   };
 
@@ -226,11 +295,14 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
+    const limit = customSettings.limit || 10;
+    const model = customSettings.model || 'groq/openai/gpt-oss-120b';
+
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idea, limit: 10 })
+        body: JSON.stringify({ idea, limit, model })
       });
 
       const data = await response.json();
@@ -257,11 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
+    const limit = customSettings.limit || 10;
+
     try {
       const response = await fetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, limit: 10 })
+        body: JSON.stringify({ query, limit })
       });
 
       const data = await response.json();
