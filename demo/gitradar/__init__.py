@@ -17,6 +17,6 @@ if sys.version_info < (3, 11):
     except ImportError:
         pass
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "GitRadar Developer"
 
