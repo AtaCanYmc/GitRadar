@@ -60,14 +60,20 @@ def create_app() -> Flask:
         model = data.get("model") or settings.default_model
         language = data.get("language") or settings.default_language
 
+        def clean_key(v):
+            if not v:
+                return None
+            cleaned = str(v).replace("\r", "").replace("\n", "").replace("\t", "").strip().strip("'\"")
+            return cleaned if cleaned else None
+
         # Extract user credentials from headers or JSON payload
-        groq_key = (
+        groq_key = clean_key(
             request.headers.get("X-Groq-Api-Key")
             or data.get("groq_key")
             or data.get("groqKey")
             or settings.groq_api_key
         )
-        github_token = (
+        github_token = clean_key(
             request.headers.get("X-Github-Token")
             or data.get("github_token")
             or data.get("githubToken")
@@ -116,7 +122,13 @@ def create_app() -> Flask:
         query = data.get("query", "").strip()
         limit = int(data.get("limit", 10))
 
-        github_token = (
+        def clean_key(v):
+            if not v:
+                return None
+            cleaned = str(v).replace("\r", "").replace("\n", "").replace("\t", "").strip().strip("'\"")
+            return cleaned if cleaned else None
+
+        github_token = clean_key(
             request.headers.get("X-Github-Token")
             or data.get("github_token")
             or data.get("githubToken")

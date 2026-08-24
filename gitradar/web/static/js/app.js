@@ -456,6 +456,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return md;
   }
 
+  function sanitizeHeaderValue(val) {
+    if (!val) return '';
+    return String(val).replace(/[\r\n\t]/g, '').trim().replace(/^['"]|['"]$/g, '');
+  }
+
   // Handle Full Analysis
   analyzeBtn.addEventListener('click', async () => {
     const idea = ideaInput.value.trim();
@@ -469,8 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
-    const activeGroqKey = settingGroqKey.value.trim() || customSettings.groqKey || '';
-    const activeGithubToken = settingGithubToken.value.trim() || customSettings.githubToken || '';
+    const activeGroqKey = sanitizeHeaderValue(settingGroqKey.value || customSettings.groqKey);
+    const activeGithubToken = sanitizeHeaderValue(settingGithubToken.value || customSettings.githubToken);
     const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
     const model = settingModelSelect.value || customSettings.model || 'groq/openai/gpt-oss-120b';
     const language = settingReportLangSelect.value || customSettings.language || (currentLang === 'tr' ? 'Turkish' : 'English');
@@ -527,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
-    const activeGithubToken = settingGithubToken.value.trim() || customSettings.githubToken || '';
+    const activeGithubToken = sanitizeHeaderValue(settingGithubToken.value || customSettings.githubToken);
     const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
 
     const headers = { 'Content-Type': 'application/json' };
