@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from gitradar.config import settings
 from gitradar.services.github import GitHubService
 from gitradar.services.llm import LLMService
@@ -19,6 +19,13 @@ def create_app() -> Flask:
     @app.route("/")
     def index():
         return render_template("index.html")
+
+    @app.route("/<path:filename>")
+    def serve_static_root(filename):
+        target = BASE_DIR / "static" / filename
+        if target.is_file():
+            return send_from_directory(BASE_DIR / "static", filename)
+        return jsonify({"error": "Not found"}), 404
 
     @app.route("/api/config", methods=["GET"])
     def get_config():
