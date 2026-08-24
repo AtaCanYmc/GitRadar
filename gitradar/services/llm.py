@@ -1,7 +1,21 @@
 import json
 import os
 import re
+import sys
+import typing
 from typing import List, Optional
+
+# Ensure typing backports are attached to typing module for Python < 3.11 before importing litellm
+if sys.version_info < (3, 11):
+    try:
+        import typing_extensions
+
+        for _name in ("NotRequired", "Required", "Self", "Never", "LiteralString", "TypeAlias", "Override", "dataclass_transform"):
+            if not hasattr(typing, _name) and hasattr(typing_extensions, _name):
+                setattr(typing, _name, getattr(typing_extensions, _name))
+    except ImportError:
+        pass
+
 import httpx
 import litellm
 from litellm import completion, NotFoundError, BadRequestError
