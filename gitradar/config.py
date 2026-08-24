@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import Optional
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 CONFIG_DIR = Path.home() / ".config" / "gitradar"
@@ -20,10 +21,39 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @field_validator("max_repos_to_analyze", mode="before")
+    @classmethod
+    def validate_max_repos(cls, v):
+        if v is None or (isinstance(v, str) and v.strip() == ""):
+            return 10
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return 10
+
+    @field_validator("groq_api_key", "github_token", "default_model", "default_language", mode="before")
+    @classmethod
+    def validate_empty_strings(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
+
 
 def load_settings() -> Settings:
-    """Load settings from env vars or config files."""
-    return Settings()
+    """Load settings from env vars or config files safely."""
+    try:
+        return Settings()
+    except Exception:
+        try:
+            return Settings(_env_file=None)
+        except Exception:
+            return Settings.model_construct(
+                groq_api_key=None,
+                github_token=None,
+                default_model="groq/llama-3.1-8b-instant",
+                default_language="English",
+                max_repos_to_analyze=10,
+            )
 
 
 def save_setting(key: str, value: str) -> None:
