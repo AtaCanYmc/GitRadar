@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.2](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.1...v0.1.2) (2026-08-24)
+
+
+### Features
+
+* add export functionality for reports in Markdown and JSON formats with language selection support ([e870300](https://github.com/AtaCanYmc/GitRadar/commit/e87030028e5fc7b8ab2bbcca97a2cfd4fad9f917))
+* add settings modal for user configuration with local storage support ([62a564c](https://github.com/AtaCanYmc/GitRadar/commit/62a564c05a015760483ee6b0e2d2d9e6dee75854))
+* add static file serving and web app manifest for improved user experience ([1ef419b](https://github.com/AtaCanYmc/GitRadar/commit/1ef419ba6aac7cdc4ab46e0dd071b5fd587d5063))
+* add Vercel deployment configuration and enhance web demo with language selection and report export features ([c17d9ed](https://github.com/AtaCanYmc/GitRadar/commit/c17d9edbf6fc7482eb7f7e7079fa5641b881cd35))
+* enhance compatibility and add theme toggle with internationalization support ([b4f8695](https://github.com/AtaCanYmc/GitRadar/commit/b4f869595d4714b52339f28c849183e824070bc2))
+
 ## [0.1.2] - 2026-08-24
 
 ### Added
