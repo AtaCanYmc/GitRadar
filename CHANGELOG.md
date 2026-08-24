@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.3](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.2...v0.1.3) (2026-08-24)
+
+
+### Features
+
+* add field validators for configuration settings to ensure defaults and handle empty values ([86debf6](https://github.com/AtaCanYmc/GitRadar/commit/86debf69d53ea62cc08e798d68f7df6efcfa69df))
+* add sanitizeHeaderValue function to clean API keys and improve security ([6ed25f6](https://github.com/AtaCanYmc/GitRadar/commit/6ed25f6c5d6fbcc3d1994417ad64abaae73ec4d6))
+* enhance JSON handling and default values in models for improved data integrity ([c6367f0](https://github.com/AtaCanYmc/GitRadar/commit/c6367f0336d6e2edfc6312cf4ab2bd929e81fe26))
+* implement GitRadar web dashboard module with async GitHub API integration and market analysis features ([cf3bce3](https://github.com/AtaCanYmc/GitRadar/commit/cf3bce391c73ae58e53d1cb941a88d01726fc928))
+* improve error handling for invalid Groq API keys and sync custom settings on load ([8104a7d](https://github.com/AtaCanYmc/GitRadar/commit/8104a7de64683c9c9bab3e107cf5b270964d0792))
+* update page title for clarity in Vercel web demo ([1ee6c6a](https://github.com/AtaCanYmc/GitRadar/commit/1ee6c6aeb785e1dead560963b0edfdce69ef0ff2))
+
 ## [0.1.2](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.1...v0.1.2) (2026-08-24)
 
 
