@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitradar"
-version = "0.1.1"
+version = "0.1.2"
 description = "CLI tool for GitHub market & gap analysis using LLM and GitHub REST API"
 readme = "README.md"
 authors = [
