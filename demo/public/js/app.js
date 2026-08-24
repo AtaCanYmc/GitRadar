@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (customSettings.githubToken) settingGithubToken.value = customSettings.githubToken;
   }
 
+  // Populate modal inputs on load
+  populateSettingsModal();
+
   openSettingsBtn.addEventListener('click', () => {
     populateSettingsModal();
     settingsModal.classList.remove('hidden');
@@ -466,13 +469,25 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
-    const limit = customSettings.limit || 10;
-    const model = customSettings.model || 'groq/openai/gpt-oss-120b';
-    const language = customSettings.language || (currentLang === 'tr' ? 'Turkish' : 'English');
+    const activeGroqKey = settingGroqKey.value.trim() || customSettings.groqKey || '';
+    const activeGithubToken = settingGithubToken.value.trim() || customSettings.githubToken || '';
+    const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
+    const model = settingModelSelect.value || customSettings.model || 'groq/openai/gpt-oss-120b';
+    const language = settingReportLangSelect.value || customSettings.language || (currentLang === 'tr' ? 'Turkish' : 'English');
+
+    // Keep customSettings synced
+    customSettings = {
+      language,
+      model,
+      limit,
+      groqKey: activeGroqKey,
+      githubToken: activeGithubToken,
+    };
+    localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
 
     const headers = { 'Content-Type': 'application/json' };
-    if (customSettings.groqKey) headers['X-Groq-Api-Key'] = customSettings.groqKey;
-    if (customSettings.githubToken) headers['X-Github-Token'] = customSettings.githubToken;
+    if (activeGroqKey) headers['X-Groq-Api-Key'] = activeGroqKey;
+    if (activeGithubToken) headers['X-Github-Token'] = activeGithubToken;
 
     try {
       const response = await fetch('/api/analyze', {
@@ -483,8 +498,8 @@ document.addEventListener('DOMContentLoaded', () => {
           limit,
           model,
           language,
-          groq_key: customSettings.groqKey || undefined,
-          github_token: customSettings.githubToken || undefined,
+          groq_key: activeGroqKey || undefined,
+          github_token: activeGithubToken || undefined,
         })
       });
 
@@ -512,10 +527,11 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
-    const limit = customSettings.limit || 10;
+    const activeGithubToken = settingGithubToken.value.trim() || customSettings.githubToken || '';
+    const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
 
     const headers = { 'Content-Type': 'application/json' };
-    if (customSettings.githubToken) headers['X-Github-Token'] = customSettings.githubToken;
+    if (activeGithubToken) headers['X-Github-Token'] = activeGithubToken;
 
     try {
       const response = await fetch('/api/search', {
@@ -524,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           query,
           limit,
-          github_token: customSettings.githubToken || undefined,
+          github_token: activeGithubToken || undefined,
         })
       });
 

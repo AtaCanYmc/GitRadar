@@ -69,16 +69,16 @@ class LLMService:
     """Service to interact with LiteLLM for query expansion and gap analysis."""
 
     def __init__(self, api_key: str = None, model: str = None, language: str = None):
-        self.api_key = api_key or settings.groq_api_key or os.environ.get("GROQ_API_KEY")
+        raw_key = api_key or settings.groq_api_key or os.environ.get("GROQ_API_KEY") or ""
+        self.api_key = raw_key.strip().strip("'\"")
         self.model = model or settings.default_model
         self.language = language or settings.default_language
 
     def _ensure_api_key(self):
-        if not self.api_key:
+        if not self.api_key or self.api_key.strip() in ("", "gsk_...", "gsk_your_groq_api_key_here"):
             raise ValueError(
-                "GROQ_API_KEY not found! "
-                "Please configure your API key: `gitradar config --groq-api-key YOUR_KEY` "
-                "or set the GROQ_API_KEY environment variable."
+                "Missing Groq API Key! Please open the Settings Modal (⚙️) and enter a valid Groq API key, "
+                "or run `gitradar config --groq-api-key YOUR_KEY`. Get a free key at https://console.groq.com"
             )
 
     def _fetch_active_groq_models(self) -> List[str]:
@@ -127,6 +127,11 @@ class LLMService:
                 return extract_json(content)
             except Exception as e:
                 err_str = str(e).lower()
+                if "invalid_api_key" in err_str or "invalid api key" in err_str or "authentication" in err_str:
+                    raise ValueError(
+                        "Invalid Groq API Key! Please enter a valid key in the Settings Modal (⚙️) "
+                        "or run `gitradar config --groq-api-key YOUR_KEY`. Get a free key at https://console.groq.com"
+                    ) from e
                 if "model_not_found" in err_str or "does not exist" in err_str or isinstance(e, NotFoundError):
                     last_exception = e
                     continue
@@ -142,8 +147,22 @@ class LLMService:
                 content = res.choices[0].message.content
                 return extract_json(content)
             except Exception as e:
+                err_str = str(e).lower()
+                if "invalid_api_key" in err_str or "invalid api key" in err_str or "authentication" in err_str:
+                    raise ValueError(
+                        "Invalid Groq API Key! Please enter a valid key in the Settings Modal (⚙️) "
+                        "or run `gitradar config --groq-api-key YOUR_KEY`. Get a free key at https://console.groq.com"
+                    ) from e
                 last_exception = e
                 continue
+
+        if last_exception:
+            err_str = str(last_exception).lower()
+            if "invalid_api_key" in err_str or "invalid api key" in err_str or "authentication" in err_str:
+                raise ValueError(
+                    "Invalid Groq API Key! Please enter a valid key in the Settings Modal (⚙️) "
+                    "or run `gitradar config --groq-api-key YOUR_KEY`. Get a free key at https://console.groq.com"
+                )
 
         raise last_exception or RuntimeError("All model fallback attempts failed.")
 

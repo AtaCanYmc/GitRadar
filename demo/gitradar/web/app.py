@@ -102,8 +102,13 @@ def create_app() -> Flask:
                 "report": report.model_dump(),
             })
 
+        except ValueError as ve:
+            return jsonify({"error": str(ve)}), 400
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            err_msg = str(e)
+            if any(k in err_msg.lower() for k in ["invalid_api_key", "invalid api key", "groqexception"]):
+                err_msg = "Invalid Groq API Key! Please click the Settings Modal (⚙️) in the top-right corner and enter a valid Groq API Key (gsk_...). Get a free key at https://console.groq.com"
+            return jsonify({"error": err_msg}), 400
 
     @app.route("/api/search", methods=["POST"])
     def search_repos():
