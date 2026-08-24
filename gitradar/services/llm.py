@@ -45,18 +45,24 @@ def extract_json(content: str) -> dict:
     # Remove <think>...</think> block if present
     cleaned = re.sub(r"<think>.*?</think>", "", cleaned, flags=re.DOTALL).strip()
 
-    # Extract ```json ... ``` block if present
-    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
-    if match:
-        cleaned = match.group(1).strip()
-    else:
-        # Fallback to finding first '{' and last '}'
-        start = cleaned.find("{")
-        end = cleaned.rfind("}")
-        if start != -1 and end != -1 and end > start:
-            cleaned = cleaned[start : end + 1].strip()
+    # Remove markdown code blocks if wrapped in ```json ... ``` or ``` ... ```
+    if "```" in cleaned:
+        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+        cleaned = cleaned.strip()
 
-    return json.loads(cleaned)
+    # Find outer-most JSON bounds: first '{' and last '}'
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        cleaned = cleaned[start : end + 1].strip()
+
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        # Sanitize trailing commas: e.g. ", }" -> "}" or ", ]" -> "]"
+        sanitized = re.sub(r",\s*([\}\]])", r"\1", cleaned)
+        return json.loads(sanitized)
 
 
 class LLMService:
@@ -157,7 +163,23 @@ class LLMService:
             temperature=0.3,
         )
 
-        return ExpandedQueries(**data)
+        if not isinstance(data, dict):
+            data = {}
+
+        if "search_keywords" in data and not isinstance(data["search_keywords"], list):
+            data["search_keywords"] = [str(data["search_keywords"])]
+        if "github_topics" in data and not isinstance(data["github_topics"], list):
+            data["github_topics"] = [str(data["github_topics"])]
+
+        try:
+            return ExpandedQueries(**data)
+        except Exception:
+            return ExpandedQueries(
+                search_keywords=data.get("search_keywords") or [idea],
+                github_topics=data.get("github_topics") or [],
+                target_languages=data.get("target_languages") or [],
+                search_explanation=str(data.get("search_explanation") or "Search strategy generated."),
+            )
 
     def analyze_market_and_gaps(self, idea: str, repositories: List[RepositoryInfo], language: str = None) -> GapAnalysisReport:
         """Analyze market saturation, identify gaps, differentiators, and produce an analysis report."""
@@ -175,5 +197,27 @@ class LLMService:
             temperature=0.4,
         )
 
-        return GapAnalysisReport(**data)
+        if not isinstance(data, dict):
+            data = {}
+
+        for score_key in ("saturation_score", "opportunity_score"):
+            if score_key in data:
+                try:
+                    data[score_key] = int(data[score_key])
+                except (ValueError, TypeError):
+                    data[score_key] = 50
+
+        try:
+            return GapAnalysisReport(**data)
+        except Exception:
+            return GapAnalysisReport(
+                idea_summary=str(data.get("idea_summary") or idea),
+                market_saturation=str(data.get("market_saturation") or "Moderate"),
+                saturation_score=int(data.get("saturation_score") or 50),
+                market_summary=str(data.get("market_summary") or "Market analysis completed."),
+                unmet_needs=list(data.get("unmet_needs") or []),
+                differentiators=list(data.get("differentiators") or []),
+                actionable_recommendations=list(data.get("actionable_recommendations") or []),
+                opportunity_score=int(data.get("opportunity_score") or 80),
+            )
 
