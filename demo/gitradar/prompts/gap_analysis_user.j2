@@ -1,0 +1,18 @@
+Developer Project Idea:
+{{ idea }}
+
+Existing Candidate Repositories Found on GitHub ({{ repositories|length }} items):
+{% if repositories %}
+{% for r in repositories %}
+{{ loop.index }}. Repo: {{ r.full_name }}
+   Stars: {{ r.stars }} | Forks: {{ r.forks }} | Language: {{ r.language }}
+   Description: {{ r.description }}
+   Topics: {{ r.topics|join(', ') }}
+{% if r.readme_snippet %}
+   README Snippet: {{ r.readme_snippet[:300] }}...
+{% endif %}
+
+{% endfor %}
+{% else %}
+No directly relevant repositories found.
+{% endif %}

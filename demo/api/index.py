@@ -2,10 +2,10 @@ import os
 import sys
 from pathlib import Path
 
-# Insert repository root directory into Python path
-ROOT_DIR = Path(__file__).parent.parent.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
+# Add demo directory to sys.path so bundled gitradar package is importable on Vercel
+DEMO_DIR = Path(__file__).parent.parent
+if str(DEMO_DIR) not in sys.path:
+    sys.path.insert(0, str(DEMO_DIR))
 
 # Import monkeypatch for Python compatibility
 import gitradar  # noqa: F401
