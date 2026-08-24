@@ -53,3 +53,38 @@ def test_gap_analysis_report_model():
     assert report.market_saturation == "Orta"
     assert report.opportunity_score == 80
     assert len(report.top_competitors) == 1
+
+
+def test_implementation_guide_model():
+    from gitradar.models import ImplementationGuide, OpenSourceTool
+
+    guide = ImplementationGuide(
+        recommended_tech_stack=["Python", "Typer", "LiteLLM"],
+        architecture_overview="Build a modular CLI with asynchronous GitHub REST API calls.",
+        open_source_building_blocks=[
+            OpenSourceTool(
+                name="Typer",
+                category="CLI Framework",
+                description_and_usage="Used for building CLI commands.",
+                repo_url="https://github.com/fastapi/typer",
+            )
+        ],
+    )
+
+    report = GapAnalysisReport(
+        idea_summary="Test Idea",
+        market_saturation="Low",
+        saturation_score=30,
+        market_summary="Summary",
+        unmet_needs=[],
+        differentiators=[],
+        actionable_recommendations=[],
+        opportunity_score=90,
+        implementation_guide=guide,
+    )
+
+    assert report.implementation_guide is not None
+    assert "Python" in report.implementation_guide.recommended_tech_stack
+    assert len(report.implementation_guide.open_source_building_blocks) == 1
+    assert report.implementation_guide.open_source_building_blocks[0].name == "Typer"
+

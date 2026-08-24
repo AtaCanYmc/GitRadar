@@ -62,9 +62,10 @@ def extract_json(content: str) -> dict:
 class LLMService:
     """Service to interact with LiteLLM for query expansion and gap analysis."""
 
-    def __init__(self, api_key: str = None, model: str = None):
+    def __init__(self, api_key: str = None, model: str = None, language: str = None):
         self.api_key = api_key or settings.groq_api_key or os.environ.get("GROQ_API_KEY")
         self.model = model or settings.default_model
+        self.language = language or settings.default_language
 
     def _ensure_api_key(self):
         if not self.api_key:
@@ -140,11 +141,12 @@ class LLMService:
 
         raise last_exception or RuntimeError("All model fallback attempts failed.")
 
-    def expand_idea_to_queries(self, idea: str) -> ExpandedQueries:
+    def expand_idea_to_queries(self, idea: str, language: str = None) -> ExpandedQueries:
         """Use LLM to generate search keywords and GitHub topics based on the project idea."""
         self._ensure_api_key()
+        lang = language or self.language or settings.default_language
 
-        system_prompt = render_prompt("query_expansion_system")
+        system_prompt = render_prompt("query_expansion_system", language=lang)
         user_prompt = render_prompt("query_expansion_user", idea=idea)
 
         data = self._completion_with_fallback(
@@ -157,11 +159,12 @@ class LLMService:
 
         return ExpandedQueries(**data)
 
-    def analyze_market_and_gaps(self, idea: str, repositories: List[RepositoryInfo]) -> GapAnalysisReport:
+    def analyze_market_and_gaps(self, idea: str, repositories: List[RepositoryInfo], language: str = None) -> GapAnalysisReport:
         """Analyze market saturation, identify gaps, differentiators, and produce an analysis report."""
         self._ensure_api_key()
+        lang = language or self.language or settings.default_language
 
-        system_prompt = render_prompt("gap_analysis_system")
+        system_prompt = render_prompt("gap_analysis_system", language=lang)
         user_prompt = render_prompt("gap_analysis_user", idea=idea, repositories=repositories)
 
         data = self._completion_with_fallback(
@@ -173,3 +176,4 @@ class LLMService:
         )
 
         return GapAnalysisReport(**data)
+

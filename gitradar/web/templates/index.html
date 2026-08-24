@@ -185,6 +185,32 @@
 
     <!-- Results Section -->
     <div id="results" class="hidden">
+      <!-- Export Actions Header -->
+      <div class="export-actions-bar">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);" data-i18n="export_report_label">Export Report</span>
+        </div>
+        <div class="export-btn-group">
+          <button id="export-md-btn" class="export-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span data-i18n="btn_export_md">Export Markdown (.md)</span>
+          </button>
+          <button id="export-json-btn" class="export-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span data-i18n="btn_export_json">Export JSON (.json)</span>
+          </button>
+          <button id="copy-report-btn" class="export-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="copy-btn-text" data-i18n="btn_copy_report">Copy Report</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Derived AI Strategy Panel -->
       <section class="card" id="strategy-panel">
         <div class="card-header">
@@ -336,6 +362,35 @@
         </div>
         <div id="rec-list" style="margin-top: 0.75rem;"></div>
       </section>
+
+      <!-- Implementation Architecture & Open Source Tools -->
+      <section id="implementation-section" class="card hidden" style="border-color: rgba(99, 102, 241, 0.25);">
+        <div class="card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-indigo)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <h3 class="card-title" style="color: var(--accent-indigo);" data-i18n="tech_guide_title">Technical Implementation & Open-Source Roadmap</h3>
+        </div>
+        
+        <div style="margin-top: 0.75rem;">
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;" data-i18n="recommended_stack_label">Recommended Tech Stack</div>
+            <div id="tech-stack-badges" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;" data-i18n="arch_overview_label">Architecture Overview</div>
+            <p id="arch-overview-text" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;"></p>
+          </div>
+
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;" data-i18n="open_source_blocks_label">Recommended Open-Source Building Blocks</div>
+            <div id="open-source-tools-list" class="comp-grid"></div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -354,6 +409,17 @@
       </div>
 
       <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" data-i18n="setting_report_lang">AI Response Language</label>
+          <select id="setting-report-lang-select" class="form-select">
+            <option value="English">English</option>
+            <option value="Turkish">Türkçe</option>
+            <option value="Spanish">Español</option>
+            <option value="German">Deutsch</option>
+            <option value="French">Français</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label class="form-label" data-i18n="setting_model">LLM Model</label>
           <select id="setting-model-select" class="form-select">

@@ -33,6 +33,21 @@ class CompetitorSummary(BaseModel):
     weaknesses_or_gaps: List[str]
 
 
+class OpenSourceTool(BaseModel):
+    """Model representing a recommended open-source library or tool to build the project."""
+    name: str = Field(..., description="Name of the open-source tool or library (e.g. Typer, Qdrant, Tree-sitter)")
+    category: str = Field(..., description="Category (e.g. CLI Framework, Vector DB, LLM SDK, Parser)")
+    description_and_usage: str = Field(..., description="How to leverage this tool in building the project idea")
+    repo_url: Optional[str] = Field(default=None, description="GitHub repository or URL link if applicable")
+
+
+class ImplementationGuide(BaseModel):
+    """Model for architecture and technical implementation guidance."""
+    recommended_tech_stack: List[str] = Field(default_factory=list, description="Recommended technology stack (languages, frameworks, DBs)")
+    architecture_overview: str = Field(..., description="High-level architecture and how the system should be structured")
+    open_source_building_blocks: List[OpenSourceTool] = Field(default_factory=list, description="Key open-source tools to use during development")
+
+
 class GapAnalysisReport(BaseModel):
     """Model for LLM generated Market and Gap Analysis Report."""
     idea_summary: str = Field(..., description="Summary of the analyzed project idea")
@@ -44,3 +59,5 @@ class GapAnalysisReport(BaseModel):
     differentiators: List[str] = Field(..., description="Key differentiators to make your project stand out")
     actionable_recommendations: List[str] = Field(..., description="Actionable recommendations for the developer")
     opportunity_score: int = Field(..., description="Opportunity potential score from 1-100")
+    implementation_guide: Optional[ImplementationGuide] = Field(default=None, description="Architecture, tech stack, and open source building blocks")
+

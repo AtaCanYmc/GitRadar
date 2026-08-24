@@ -24,18 +24,19 @@ console = Console()
 def analyze(
     idea: str = typer.Argument(..., help="Project idea to analyze (e.g. 'AI code review tool for git hooks')"),
     limit: int = typer.Option(10, "--limit", "-l", help="Maximum repositories to fetch and evaluate"),
-    model: Optional[str] = typer.Option(None, "--model", "-m", help="Override LiteLLM model (Default: groq/llama-3.3-70b-versatile)"),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="Override LiteLLM model"),
+    language: Optional[str] = typer.Option(None, "--lang", "--language", help="Output language for AI report (e.g. 'Turkish', 'English', 'Spanish')"),
 ):
     """Run full AI-driven market and gap analysis workflow on a project idea."""
     ui.display_banner()
 
     try:
-        llm_service = LLMService(model=model)
+        llm_service = LLMService(model=model, language=language)
         github_service = GitHubService()
 
         # Step 1: Query Expansion with LLM
         with Status("[bold cyan]🧠 Analyzing project idea with LLM & deriving search strategy...[/bold cyan]", spinner="dots"):
-            queries = llm_service.expand_idea_to_queries(idea)
+            queries = llm_service.expand_idea_to_queries(idea, language=language)
         
         ui.display_query_strategy(queries)
 
@@ -57,7 +58,7 @@ def analyze(
 
         # Step 3: Semantic Gap Analysis with LLM
         with Status("[bold cyan]🎯 Semantically evaluating candidate repos & synthesizing Market & Gap Report...[/bold cyan]", spinner="bouncingBar"):
-            report = llm_service.analyze_market_and_gaps(idea, repos)
+            report = llm_service.analyze_market_and_gaps(idea, repos, language=language)
 
         # Step 4: Display Final Report
         ui.display_gap_report(report)
@@ -118,6 +119,7 @@ def config_command(
     groq_api_key: Optional[str] = typer.Option(None, "--groq-api-key", help="Save Groq API Key credential"),
     github_token: Optional[str] = typer.Option(None, "--github-token", help="Save GitHub Access Token credential"),
     default_model: Optional[str] = typer.Option(None, "--model", help="Save default LiteLLM model identifier"),
+    default_language: Optional[str] = typer.Option(None, "--lang", "--language", help="Save default response language for AI reports"),
 ):
     """Manage GitRadar configuration."""
     ui.display_banner()
@@ -138,6 +140,11 @@ def config_command(
         ui.display_info(f"Default model saved as '{default_model}'! 🤖")
         updated = True
 
+    if default_language:
+        save_setting("DEFAULT_LANGUAGE", default_language)
+        ui.display_info(f"Default language saved as '{default_language}'! 🌐")
+        updated = True
+
     if show or not updated:
         curr_settings = settings
         grid = ui.Table(title="⚙️ Current GitRadar Configuration", header_style="bold yellow", expand=True)
@@ -153,6 +160,7 @@ def config_command(
         grid.add_row("GROQ_API_KEY", masked_groq)
         grid.add_row("GITHUB_TOKEN", masked_gh)
         grid.add_row("DEFAULT_MODEL", curr_settings.default_model)
+        grid.add_row("DEFAULT_LANGUAGE", curr_settings.default_language)
         grid.add_row("MAX_REPOS_TO_ANALYZE", str(curr_settings.max_repos_to_analyze))
 
         console.print(grid)

@@ -14,6 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const errorMessage = document.getElementById('error-message');
   const results = document.getElementById('results');
 
+  // Export Buttons
+  const exportMDBtn = document.getElementById('export-md-btn');
+  const exportJSONBtn = document.getElementById('export-json-btn');
+  const copyReportBtn = document.getElementById('copy-report-btn');
+  const copyBtnText = document.getElementById('copy-btn-text');
+
   // Settings Modal Elements
   const settingsModal = document.getElementById('settings-modal');
   const openSettingsBtn = document.getElementById('open-settings-btn');
@@ -21,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
   const saveSettingsBtn = document.getElementById('save-settings-btn');
 
+  const settingReportLangSelect = document.getElementById('setting-report-lang-select');
   const settingModelSelect = document.getElementById('setting-model-select');
   const settingLimitInput = document.getElementById('setting-limit-input');
   const settingGroqKey = document.getElementById('setting-groq-key');
@@ -30,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let customSettings = JSON.parse(localStorage.getItem('gitradar_settings') || '{}');
 
   function populateSettingsModal() {
+    if (customSettings.language) settingReportLangSelect.value = customSettings.language;
     if (customSettings.model) settingModelSelect.value = customSettings.model;
     if (customSettings.limit) settingLimitInput.value = customSettings.limit;
     if (customSettings.groqKey) settingGroqKey.value = customSettings.groqKey;
@@ -60,12 +68,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   saveSettingsBtn.addEventListener('click', () => {
     customSettings = {
+      language: settingReportLangSelect.value,
       model: settingModelSelect.value,
       limit: parseInt(settingLimitInput.value, 10) || 10,
       groqKey: settingGroqKey.value.trim(),
       githubToken: settingGithubToken.value.trim(),
     };
     localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
+
+    // Also update UI language if setting language matches TR or English
+    if (customSettings.language === 'Turkish') {
+      currentLang = 'tr';
+    } else if (customSettings.language === 'English') {
+      currentLang = 'en';
+    }
+    localStorage.setItem('gitradar_lang', currentLang);
+    setLanguage(currentLang);
+
     closeSettings();
   });
 
@@ -140,12 +159,22 @@ document.addEventListener('DOMContentLoaded', () => {
       diff_title: "Key Differentiators",
       rec_title: "Strategic Action Items",
       settings_title: "Configuration Settings",
+      setting_report_lang: "AI Response Language",
       setting_model: "LLM Model",
       setting_limit: "Max Repositories to Analyze",
       setting_groq_key: "Groq API Key",
       setting_github_token: "GitHub Access Token (Optional)",
       btn_cancel: "Cancel",
       btn_save: "Save Settings",
+      tech_guide_title: "Technical Implementation & Open-Source Roadmap",
+      recommended_stack_label: "Recommended Tech Stack",
+      arch_overview_label: "Architecture Overview",
+      open_source_blocks_label: "Recommended Open-Source Building Blocks",
+      export_report_label: "Export Report",
+      btn_export_md: "Export Markdown (.md)",
+      btn_export_json: "Export JSON (.json)",
+      btn_copy_report: "Copy Report",
+      copied_text: "Copied!",
     },
     tr: {
       engine_active: "Servis Aktif",
@@ -191,12 +220,22 @@ document.addEventListener('DOMContentLoaded', () => {
       diff_title: "Öne Çıkan Farklılaştırıcılar",
       rec_title: "Stratejik Öneriler",
       settings_title: "Yapılandırma Ayarları",
+      setting_report_lang: "Yapay Zeka Yanıt Dili",
       setting_model: "LLM Modeli",
       setting_limit: "Analiz Edilecek Maks. Depo Sayısı",
       setting_groq_key: "Groq API Anahtarı",
       setting_github_token: "GitHub Erişim Jetonu (İsteğe Bağlı)",
       btn_cancel: "İptal",
       btn_save: "Ayarları Kaydet",
+      tech_guide_title: "Teknik Mimari & Açık Kaynak Yol Haritası",
+      recommended_stack_label: "Önerilen Teknoloji Yığını",
+      arch_overview_label: "Mimari Genel Bakış",
+      open_source_blocks_label: "Önerilen Açık Kaynak Yapı Taşları",
+      export_report_label: "Raporu Dışa Aktar",
+      btn_export_md: "Markdown İndir (.md)",
+      btn_export_json: "JSON İndir (.json)",
+      btn_copy_report: "Raporu Kopyala",
+      copied_text: "Kopyalandı!",
     }
   };
 
@@ -209,6 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (selectedLang && selectedLang !== currentLang) {
         currentLang = selectedLang;
         localStorage.setItem('gitradar_lang', currentLang);
+        
+        // Update customSettings language as well
+        customSettings.language = currentLang === 'tr' ? 'Turkish' : 'English';
+        localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
+
         setLanguage(currentLang);
       }
     });
@@ -282,6 +326,133 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') quickSearchBtn.click();
   });
 
+  // Export Button Event Handlers
+  exportMDBtn.addEventListener('click', () => {
+    if (!window.lastReportData) return;
+    const mdContent = generateMarkdownReport(window.lastReportData);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    downloadFile(`gitradar_report_${dateStr}.md`, mdContent, 'text/markdown');
+  });
+
+  exportJSONBtn.addEventListener('click', () => {
+    if (!window.lastReportData) return;
+    const jsonContent = JSON.stringify(window.lastReportData, null, 2);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    downloadFile(`gitradar_report_${dateStr}.json`, jsonContent, 'application/json');
+  });
+
+  copyReportBtn.addEventListener('click', () => {
+    if (!window.lastReportData) return;
+    const mdContent = generateMarkdownReport(window.lastReportData);
+    const t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+
+    navigator.clipboard.writeText(mdContent).then(() => {
+      const origText = copyBtnText.textContent;
+      copyBtnText.textContent = t.copied_text || "Copied!";
+      setTimeout(() => {
+        copyBtnText.textContent = origText;
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy to clipboard:', err);
+    });
+  });
+
+  function downloadFile(filename, text, mimeType) {
+    const blob = new Blob([text], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function generateMarkdownReport(data) {
+    const { queries, repositories, report } = data;
+    const dateStr = new Date().toLocaleString();
+
+    let md = `# 📡 GitRadar Market & Gap Analysis Report\n`;
+    md += `*Generated on: ${dateStr}*\n\n`;
+
+    md += `## 📌 Executive Overview\n`;
+    md += `- **Project Idea:** ${report.idea_summary || 'N/A'}\n`;
+    md += `- **Opportunity Score:** ${report.opportunity_score}/100 🚀\n`;
+    md += `- **Market Saturation:** ${report.market_saturation} (Score: ${report.saturation_score || 50}/100)\n`;
+    md += `- **Repositories Analyzed:** ${repositories.length}\n\n`;
+
+    md += `### 💡 Market Summary\n${report.market_summary}\n\n`;
+
+    if (queries) {
+      md += `## 🧠 Synthesized Search Strategy\n`;
+      md += `- **Keywords:** ${queries.search_keywords ? queries.search_keywords.join(', ') : ''}\n`;
+      md += `- **GitHub Topics:** ${queries.github_topics ? queries.github_topics.map(t => '#' + t).join(', ') : ''}\n`;
+      md += `- **Strategy Note:** ${queries.search_explanation || ''}\n\n`;
+    }
+
+    if (repositories && repositories.length > 0) {
+      md += `## 📊 Discovered Candidate Repositories\n`;
+      md += `| # | Repository | Stars | Forks | Language | Updated | Description |\n`;
+      md += `|---|------------|-------|-------|----------|---------|-------------|\n`;
+      repositories.forEach((r, idx) => {
+        md += `| ${idx + 1} | [${r.full_name}](${r.html_url}) | ${r.stars} | ${r.forks} | ${r.language || 'N/A'} | ${r.updated_at || '-'} | ${(r.description || '').replace(/\|/g, '-')} |\n`;
+      });
+      md += `\n`;
+    }
+
+    if (report.top_competitors && report.top_competitors.length > 0) {
+      md += `## 🏆 Top Competitor Profiles\n`;
+      report.top_competitors.forEach(c => {
+        md += `### ${c.repo_name}\n`;
+        md += `**Strengths:**\n`;
+        (c.key_strengths || []).forEach(s => { md += `- ✅ ${s}\n`; });
+        md += `**Gaps & Weaknesses:**\n`;
+        (c.weaknesses_or_gaps || []).forEach(w => { md += `- ❌ ${w}\n`; });
+        md += `\n`;
+      });
+    }
+
+    if (report.unmet_needs && report.unmet_needs.length > 0) {
+      md += `## 🚨 Unmet Needs & Ecosystem Gaps\n`;
+      report.unmet_needs.forEach(g => { md += `- ❌ ${g}\n`; });
+      md += `\n`;
+    }
+
+    if (report.differentiators && report.differentiators.length > 0) {
+      md += `## 💎 Key Differentiators\n`;
+      report.differentiators.forEach(d => { md += `- ✨ ${d}\n`; });
+      md += `\n`;
+    }
+
+    if (report.actionable_recommendations && report.actionable_recommendations.length > 0) {
+      md += `## 🛠️ Strategic Action Items\n`;
+      report.actionable_recommendations.forEach((r, idx) => { md += `${idx + 1}. ${r}\n`; });
+      md += `\n`;
+    }
+
+    if (report.implementation_guide) {
+      const g = report.implementation_guide;
+      md += `## ⚙️ Technical Implementation & Open-Source Roadmap\n`;
+      if (g.recommended_tech_stack && g.recommended_tech_stack.length > 0) {
+        md += `**Recommended Tech Stack:** ${g.recommended_tech_stack.join(', ')}\n\n`;
+      }
+      if (g.architecture_overview) {
+        md += `### Architecture Overview\n${g.architecture_overview}\n\n`;
+      }
+      if (g.open_source_building_blocks && g.open_source_building_blocks.length > 0) {
+        md += `### Recommended Open-Source Building Blocks\n`;
+        g.open_source_building_blocks.forEach(tool => {
+          const urlStr = tool.repo_url ? ` ([GitHub](${tool.repo_url}))` : '';
+          md += `- **${tool.name}** \`[${tool.category}]\`${urlStr}: ${tool.description_and_usage}\n`;
+        });
+        md += `\n`;
+      }
+    }
+
+    return md;
+  }
+
   // Handle Full Analysis
   analyzeBtn.addEventListener('click', async () => {
     const idea = ideaInput.value.trim();
@@ -297,12 +468,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const limit = customSettings.limit || 10;
     const model = customSettings.model || 'groq/openai/gpt-oss-120b';
+    const language = customSettings.language || (currentLang === 'tr' ? 'Turkish' : 'English');
 
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idea, limit, model })
+        body: JSON.stringify({ idea, limit, model, language })
       });
 
       const data = await response.json();
@@ -457,6 +629,47 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `).join('');
 
+    // Technical Implementation Guide
+    const implSection = document.getElementById('implementation-section');
+    if (report.implementation_guide) {
+      const guide = report.implementation_guide;
+
+      // Tech Stack Badges
+      const stackBadges = (guide.recommended_tech_stack || [])
+        .map(t => `<span class="badge-code" style="border-color: rgba(99, 102, 241, 0.3); color: var(--accent-indigo);">${escapeHtml(t)}</span>`)
+        .join(' ');
+      document.getElementById('tech-stack-badges').innerHTML = stackBadges || '<span style="color: var(--text-muted); font-size: 0.85rem;">N/A</span>';
+
+      // Architecture Overview
+      document.getElementById('arch-overview-text').textContent = guide.architecture_overview || '';
+
+      // Open Source Building Blocks
+      const toolsList = document.getElementById('open-source-tools-list');
+      toolsList.innerHTML = '';
+      (guide.open_source_building_blocks || []).forEach(tool => {
+        const card = document.createElement('div');
+        card.className = 'comp-card';
+        card.style.borderColor = 'rgba(99, 102, 241, 0.2)';
+
+        const linkHtml = tool.repo_url
+          ? `<a href="${escapeHtml(tool.repo_url)}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-indigo); font-size: 0.8rem; font-family: var(--font-mono); text-decoration: none;"> 🔗 GitHub</a>`
+          : '';
+
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+            <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(tool.name)} ${linkHtml}</div>
+            <span class="badge-topic" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;">${escapeHtml(tool.category)}</span>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">${escapeHtml(tool.description_and_usage)}</p>
+        `;
+        toolsList.appendChild(card);
+      });
+
+      implSection.classList.remove('hidden');
+    } else {
+      implSection.classList.add('hidden');
+    }
+
     document.getElementById('strategy-panel').classList.remove('hidden');
     document.querySelectorAll('.metrics-grid').forEach(el => el.classList.remove('hidden'));
     results.classList.remove('hidden');
@@ -464,6 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderSearchOnlyResults(repos) {
     document.getElementById('strategy-panel').classList.add('hidden');
+    document.getElementById('implementation-section').classList.add('hidden');
     document.querySelectorAll('.metrics-grid').forEach(el => el.classList.add('hidden'));
     renderTable(repos);
     results.classList.remove('hidden');

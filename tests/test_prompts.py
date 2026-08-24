@@ -3,17 +3,18 @@ from gitradar.models import RepositoryInfo
 
 
 def test_render_query_expansion_prompts():
-    sys_prompt = render_prompt("query_expansion_system")
+    sys_prompt = render_prompt("query_expansion_system", language="Turkish")
     assert "Senior GitHub and Software Architect" in sys_prompt
-    assert "Required JSON Schema" in sys_prompt
+    assert "Provide search_explanation text in Turkish" in sys_prompt
 
     user_prompt = render_prompt("query_expansion_user", idea="AI code reviewer")
     assert "Project Idea: AI code reviewer" in user_prompt
 
 
 def test_render_gap_analysis_prompts():
-    sys_prompt = render_prompt("gap_analysis_system")
+    sys_prompt = render_prompt("gap_analysis_system", language="Turkish")
     assert "Market & Gap Analysis" in sys_prompt
+    assert "Provide ALL report text contents (summaries, strengths, gaps, differentiators, recommendations, architecture) strictly in Turkish" in sys_prompt
 
     repos = [
         RepositoryInfo(
@@ -32,3 +33,4 @@ def test_render_gap_analysis_prompts():
     assert "Developer Project Idea:" in user_prompt
     assert "Repo: owner/repo-one" in user_prompt
     assert "Stars: 500" in user_prompt
+

@@ -33,6 +33,7 @@ def create_app() -> Flask:
             "groq_configured": bool(settings.groq_api_key),
             "github_configured": bool(settings.github_token),
             "default_model": settings.default_model,
+            "default_language": settings.default_language,
             "max_repos_to_analyze": settings.max_repos_to_analyze,
         })
 
@@ -42,16 +43,17 @@ def create_app() -> Flask:
         idea = data.get("idea", "").strip()
         limit = int(data.get("limit", 10))
         model = data.get("model") or settings.default_model
+        language = data.get("language") or settings.default_language
 
         if not idea:
             return jsonify({"error": "Project idea parameter is required."}), 400
 
         try:
-            llm_service = LLMService(model=model)
+            llm_service = LLMService(model=model, language=language)
             github_service = GitHubService()
 
             # 1. Expand Queries
-            queries = llm_service.expand_idea_to_queries(idea)
+            queries = llm_service.expand_idea_to_queries(idea, language=language)
 
             # 2. Search GitHub Repositories
             repos = asyncio.run(
@@ -63,7 +65,7 @@ def create_app() -> Flask:
             )
 
             # 3. Perform Gap Analysis
-            report = llm_service.analyze_market_and_gaps(idea, repos)
+            report = llm_service.analyze_market_and_gaps(idea, repos, language=language)
 
             return jsonify({
                 "queries": queries.model_dump(),

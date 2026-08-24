@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     groq_api_key: Optional[str] = None
     github_token: Optional[str] = None
     default_model: str = "groq/llama-3.1-8b-instant"
+    default_language: str = "English"
     max_repos_to_analyze: int = 10
 
     model_config = SettingsConfigDict(

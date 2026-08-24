@@ -151,6 +151,25 @@ def display_gap_report(report: GapAnalysisReport) -> None:
     console.print(Panel(Markdown(rec_md), title="[bold cyan]🛠️ Action Plan & Recommendations[/bold cyan]", border_style="cyan"))
     console.print()
 
+    # 5. Technical Implementation Guide & Open Source Building Blocks
+    if report.implementation_guide:
+        guide = report.implementation_guide
+        guide_md = ""
+        if guide.recommended_tech_stack:
+            techs = ", ".join(f"`{t}`" for t in guide.recommended_tech_stack)
+            guide_md += f"**Recommended Tech Stack:** {techs}\n\n"
+        if guide.architecture_overview:
+            guide_md += f"**Architecture Overview:**\n{guide.architecture_overview}\n\n"
+
+        if guide.open_source_building_blocks:
+            guide_md += "### 📦 Recommended Open-Source Building Blocks\n"
+            for tool in guide.open_source_building_blocks:
+                link_str = f" ([link]({tool.repo_url}))" if tool.repo_url else ""
+                guide_md += f"- **{tool.name}** `[{tool.category}]`{link_str}: {tool.description_and_usage}\n"
+
+        console.print(Panel(Markdown(guide_md), title="[bold magenta]⚙️ Technical Implementation & Open-Source Roadmap[/bold magenta]", border_style="magenta"))
+        console.print()
+
 
 def display_error(message: str) -> None:
     """Print an error panel."""
