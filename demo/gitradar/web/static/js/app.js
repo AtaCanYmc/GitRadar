@@ -320,13 +320,19 @@ document.addEventListener('DOMContentLoaded', () => {
     results.classList.add('hidden');
   });
 
-  // Enter key trigger for search boxes
+  // Enter key trigger for search boxes (Shift+Enter inserts newline)
   ideaInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') analyzeBtn.click();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      analyzeBtn.click();
+    }
   });
 
   searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') quickSearchBtn.click();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      quickSearchBtn.click();
+    }
   });
 
   // Export Button Event Handlers

@@ -279,12 +279,13 @@ body {
 .input-container {
   display: flex;
   position: relative;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .input-icon {
   position: absolute;
   left: 1.1rem;
+  top: 1.05rem;
   color: var(--text-muted);
   pointer-events: none;
 }
@@ -300,6 +301,12 @@ body {
   font-family: var(--font-mono);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s;
+}
+
+textarea.input-field {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
 }
 
 .input-field:focus {
