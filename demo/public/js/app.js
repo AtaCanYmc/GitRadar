@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
       market_synthesis: "Market Synthesis",
       discovered_repos: "Discovered Candidate Repositories",
       th_repo: "Repository",
+      th_relevance: "Relevance",
       th_stars: "Stars",
       th_forks: "Forks",
       th_lang: "Language",
@@ -211,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
       market_synthesis: "Pazar Özeti",
       discovered_repos: "Keşfedilen Aday Depolar",
       th_repo: "Depo",
+      th_relevance: "Uygunluk",
       th_stars: "Yıldız",
       th_forks: "Çatallanma",
       th_lang: "Dil",
@@ -402,10 +404,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (repositories && repositories.length > 0) {
       md += `## 📊 Discovered Candidate Repositories\n`;
-      md += `| # | Repository | Stars | Forks | Language | Updated | Description |\n`;
-      md += `|---|------------|-------|-------|----------|---------|-------------|\n`;
+      md += `| # | Repository | Relevance | Stars | Forks | Language | Updated | Description |\n`;
+      md += `|---|------------|-----------|-------|-------|----------|---------|-------------|\n`;
       repositories.forEach((r, idx) => {
-        md += `| ${idx + 1} | [${r.full_name}](${r.html_url}) | ${r.stars} | ${r.forks} | ${r.language || 'N/A'} | ${r.updated_at || '-'} | ${(r.description || '').replace(/\|/g, '-')} |\n`;
+        const relStr = (r.relevance_score !== undefined && r.relevance_score !== null) ? `${r.relevance_score}%` : 'N/A';
+        const descStr = (r.description || '').replace(/\|/g, '-');
+        const fitStr = r.relevance_reason ? ` *(Fit: ${r.relevance_reason.replace(/\|/g, '-')})*` : '';
+        md += `| ${idx + 1} | [${r.full_name}](${r.html_url}) | ${relStr} | ${r.stars} | ${r.forks} | ${r.language || 'N/A'} | ${r.updated_at || '-'} | ${descStr}${fitStr} |\n`;
       });
       md += `\n`;
     }
@@ -735,11 +740,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const tr = document.createElement('tr');
       const langColor = getLanguageColor(r.language);
 
+      let relBadge = '<span style="color: var(--text-muted); font-size: 0.8rem;">N/A</span>';
+      if (r.relevance_score !== null && r.relevance_score !== undefined) {
+        let cls = 'badge-relevance-low';
+        if (r.relevance_score >= 80) cls = 'badge-relevance-high';
+        else if (r.relevance_score >= 50) cls = 'badge-relevance-mid';
+        relBadge = `<span class="badge-relevance ${cls}" title="${escapeHtml(r.relevance_reason || '')}">🎯 ${r.relevance_score}%</span>`;
+      }
+
+      let descText = escapeHtml(r.description || '');
+      if (r.relevance_reason) {
+        descText += `<div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic; margin-top: 0.2rem;">Fit: ${escapeHtml(r.relevance_reason)}</div>`;
+      }
+
       tr.innerHTML = `
         <td style="font-family: var(--font-mono); color: var(--text-muted); width: 40px;">${idx + 1}</td>
         <td>
           <a class="repo-link" href="${escapeHtml(r.html_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.full_name)}</a>
         </td>
+        <td>${relBadge}</td>
         <td class="stat-cell">
           <span style="color: var(--accent-amber); display: inline-flex; align-items: center; gap: 0.3rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
@@ -757,7 +776,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span>${escapeHtml(r.language || 'Unknown')}</span>
         </td>
         <td style="font-family: var(--font-mono); font-size: 0.8rem;">${escapeHtml(r.updated_at || '-')}</td>
-        <td style="color: var(--text-secondary); font-size: 0.85rem; max-width: 320px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(r.description || '')}</td>
+        <td style="color: var(--text-secondary); font-size: 0.85rem; max-width: 320px;">${descText}</td>
       `;
       tbody.appendChild(tr);
     });

@@ -240,3 +240,56 @@ class LLMService:
                 opportunity_score=int(data.get("opportunity_score") or 80),
             )
 
+    def evaluate_repository_relevance(
+        self,
+        idea: str,
+        repositories: List[RepositoryInfo],
+        language: str = None
+    ) -> List[RepositoryInfo]:
+        """Evaluate LLM relevance scores and fit reasons for a list of candidate repositories."""
+        if not repositories:
+            return repositories
+
+        try:
+            self._ensure_api_key()
+            target_lang = language or self.language or settings.default_language
+
+            sys_msg = render_prompt("relevance_evaluation_system", language=target_lang)
+            user_msg = render_prompt("relevance_evaluation_user", idea=idea, repos=repositories)
+
+            data = self._completion_with_fallback(
+                messages=[
+                    {"role": "system", "content": sys_msg},
+                    {"role": "user", "content": user_msg},
+                ],
+                temperature=0.2,
+            )
+
+            if isinstance(data, dict):
+                evals = data.get("evaluations", [])
+                eval_map = {item.get("full_name"): item for item in evals if isinstance(item, dict)}
+
+                for repo in repositories:
+                    if repo.full_name in eval_map:
+                        ev = eval_map[repo.full_name]
+                        score = ev.get("relevance_score")
+                        if isinstance(score, (int, float)):
+                            repo.relevance_score = max(0, min(100, int(score)))
+                        else:
+                            repo.relevance_score = 50
+                        repo.is_direct_competitor = bool(ev.get("is_direct_competitor", repo.relevance_score >= 60))
+                        repo.relevance_reason = str(ev.get("relevance_reason") or "Evaluated fit against project idea.")
+                    else:
+                        repo.relevance_score = 50
+                        repo.is_direct_competitor = True
+                        repo.relevance_reason = "Search candidate."
+        except Exception:
+            for repo in repositories:
+                if repo.relevance_score is None:
+                    repo.relevance_score = 50
+                repo.is_direct_competitor = True
+                if not repo.relevance_reason:
+                    repo.relevance_reason = "Keyword search match."
+
+        return repositories
+

@@ -34,3 +34,25 @@ def test_render_gap_analysis_prompts():
     assert "Repo: owner/repo-one" in user_prompt
     assert "Stars: 500" in user_prompt
 
+
+def test_render_relevance_evaluation_prompts():
+    sys_prompt = render_prompt("relevance_evaluation_system", language="Turkish")
+    assert "relevance_score" in sys_prompt
+    assert "is_direct_competitor" in sys_prompt
+
+    repos = [
+        RepositoryInfo(
+            full_name="owner/repo-one",
+            name="repo-one",
+            owner="owner",
+            html_url="https://github.com/owner/repo-one",
+            description="Test description",
+            stars=500,
+            forks=50,
+            language="Python",
+        )
+    ]
+    user_prompt = render_prompt("relevance_evaluation_user", idea="Test CLI", repos=repos)
+    assert "Developer Project Idea: Test CLI" in user_prompt
+    assert "Repository: owner/repo-one" in user_prompt
+

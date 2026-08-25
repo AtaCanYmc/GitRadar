@@ -42,17 +42,22 @@ def analyze(
 
         # Step 2: GitHub Search & Enrichment
         with Status(f"[bold cyan]🔍 Scanning GitHub repositories via REST API (Max: {limit})...[/bold cyan]", spinner="earth"):
-            repos = asyncio.run(
+            candidate_repos = asyncio.run(
                 github_service.search_and_enrich(
                     keywords=queries.search_keywords,
                     topics=queries.github_topics,
-                    limit=limit,
+                    limit=max(limit * 2, 15),
                 )
             )
 
-        if not repos:
+        if not candidate_repos:
             ui.display_error("No relevant repositories found. Try phrasing your project idea with different terms.")
             raise typer.Exit(code=1)
+
+        # Step 2b: Relevance Evaluation & Hybrid Ranking
+        with Status("[bold cyan]⚖️ Evaluating relevance match & computing hybrid rankings...[/bold cyan]", spinner="dots"):
+            evaluated_repos = llm_service.evaluate_repository_relevance(idea, candidate_repos, language=language)
+            repos = github_service.rank_and_sort_by_relevance(evaluated_repos, limit=limit)
 
         ui.display_repo_table(repos, title=f"Repositories Related to '{idea}'")
 

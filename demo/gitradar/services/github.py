@@ -131,3 +131,30 @@ class GitHubService:
                     sorted_repos[i].readme_snippet = readme
 
         return sorted_repos
+
+    def rank_and_sort_by_relevance(
+        self,
+        repos: List[RepositoryInfo],
+        limit: int = 10
+    ) -> List[RepositoryInfo]:
+        """
+        Calculate hybrid score for each repository and sort by hybrid score desc.
+        Hybrid Score = (Relevance Score * 0.7) + (Normalized Star Score * 0.3)
+        """
+        if not repos:
+            return repos
+
+        import math
+        max_stars = max((r.stars for r in repos), default=1)
+
+        for r in repos:
+            rel_score = r.relevance_score if r.relevance_score is not None else 50
+            star_score = min(100.0, (math.log10(r.stars + 1) / math.log10(max(max_stars, 10) + 1)) * 100.0) if max_stars > 0 else 50.0
+            r.hybrid_score = round((rel_score * 0.7) + (star_score * 0.3), 1)
+
+        sorted_repos = sorted(
+            repos,
+            key=lambda r: (r.hybrid_score, r.stars),
+            reverse=True
+        )
+        return sorted_repos[:limit]

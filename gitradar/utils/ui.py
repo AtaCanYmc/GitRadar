@@ -62,20 +62,34 @@ def display_repo_table(repositories: List[RepositoryInfo], title: str = "Relevan
 
     table.add_column("#", justify="center", style="dim", width=3)
     table.add_column("Repository", style="bold cyan", no_wrap=True)
+    table.add_column("Relevance 🎯", justify="center", style="bold")
     table.add_column("Stars ⭐", justify="right", style="bold yellow")
     table.add_column("Forks 🍴", justify="right", style="dim cyan")
     table.add_column("Language 💻", style="green")
     table.add_column("Last Updated 📅", justify="center", style="dim")
-    table.add_column("Description", style="white")
+    table.add_column("Description & Match Fit", style="white")
 
     for idx, repo in enumerate(repositories, 1):
         desc = repo.description or ""
-        if len(desc) > 60:
-            desc = desc[:57] + "..."
+        if len(desc) > 50:
+            desc = desc[:47] + "..."
+
+        if repo.relevance_reason:
+            desc += f"\n[dim italic]Fit: {repo.relevance_reason}[/dim italic]"
+
+        rel_badge = "N/A"
+        if repo.relevance_score is not None:
+            if repo.relevance_score >= 80:
+                rel_badge = f"[bold green]🎯 {repo.relevance_score}% Match[/bold green]"
+            elif repo.relevance_score >= 50:
+                rel_badge = f"[bold yellow]⚡ {repo.relevance_score}% Match[/bold yellow]"
+            else:
+                rel_badge = f"[bold red]⚠️ {repo.relevance_score}% Match[/bold red]"
 
         table.add_row(
             str(idx),
             f"[{repo.html_url}]{repo.full_name}[/]",
+            rel_badge,
             f"{repo.stars:,}",
             f"{repo.forks:,}",
             repo.language or "N/A",

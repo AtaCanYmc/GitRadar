@@ -91,15 +91,19 @@ def create_app() -> Flask:
             queries = llm_service.expand_idea_to_queries(idea, language=language)
 
             # 2. Search GitHub Repositories
-            repos = safe_run_async(
+            raw_repos = safe_run_async(
                 github_service.search_and_enrich(
                     keywords=queries.search_keywords,
                     topics=queries.github_topics,
-                    limit=limit,
+                    limit=max(limit * 2, 15),
                 )
             )
 
-            # 3. Perform Gap Analysis
+            # 3. Relevance Evaluation & Hybrid Ranking
+            eval_repos = llm_service.evaluate_repository_relevance(idea, raw_repos, language=language)
+            repos = github_service.rank_and_sort_by_relevance(eval_repos, limit=limit)
+
+            # 4. Perform Gap Analysis
             report = llm_service.analyze_market_and_gaps(idea, repos, language=language)
 
             return jsonify({

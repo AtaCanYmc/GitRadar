@@ -16,6 +16,10 @@ class RepositoryInfo(BaseModel):
     updated_at: Optional[str] = ""
     open_issues: int = 0
     readme_snippet: Optional[str] = None
+    relevance_score: Optional[int] = Field(default=None, description="LLM evaluated relevance score 0-100%")
+    is_direct_competitor: Optional[bool] = Field(default=True, description="Whether repo directly addresses user idea concept")
+    relevance_reason: Optional[str] = Field(default=None, description="Brief explanation of relevance fit")
+    hybrid_score: Optional[float] = Field(default=0.0, description="Calculated hybrid ranking score")
 
 
 class ExpandedQueries(BaseModel):
