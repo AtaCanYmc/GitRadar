@@ -1,0 +1,14 @@
+Developer Project Idea: {{ idea }}
+
+Candidate Repositories to Evaluate:
+{% for repo in repos %}
+- Repository: {{ repo.full_name }}
+  Description: {{ repo.description }}
+  Topics: {{ repo.topics | join(', ') if repo.topics else 'None' }}
+  Language: {{ repo.language }}
+  Stars: {{ repo.stars }}
+  {% if repo.readme_snippet %}
+  README Snippet: {{ repo.readme_snippet[:300] }}
+  {% endif %}
+
+{% endfor %}
