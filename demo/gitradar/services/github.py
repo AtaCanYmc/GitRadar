@@ -121,7 +121,7 @@ class GitHubService:
                     if repo.full_name not in all_repos:
                         all_repos[repo.full_name] = repo
 
-        sorted_repos = sorted(all_repos.values(), key=lambda r: r.stars, reverse=True)[:limit]
+        sorted_repos = sorted(all_repos.values(), key=lambda r: (r.stars, r.forks, r.full_name), reverse=True)[:limit]
 
         if fetch_readmes and sorted_repos:
             readme_tasks = [
@@ -173,7 +173,7 @@ class GitHubService:
 
         sorted_repos = sorted(
             filtered_repos if filtered_repos else repos,
-            key=lambda r: (r.hybrid_score, r.stars),
+            key=lambda r: (r.hybrid_score, r.stars, r.forks, r.full_name),
             reverse=True
         )
         return sorted_repos[:limit]

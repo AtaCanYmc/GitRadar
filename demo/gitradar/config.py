@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     github_token: Optional[str] = None
     default_model: str = "groq/llama-3.1-8b-instant"
     default_language: str = "English"
-    max_repos_to_analyze: int = 10
+    max_repos_to_analyze: int = 50
     min_relevance_threshold: int = 50
 
     model_config = SettingsConfigDict(
@@ -53,7 +53,7 @@ def load_settings() -> Settings:
                 github_token=None,
                 default_model="groq/llama-3.1-8b-instant",
                 default_language="English",
-                max_repos_to_analyze=10,
+                max_repos_to_analyze=50,
             )
 
 

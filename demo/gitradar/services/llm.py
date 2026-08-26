@@ -179,7 +179,7 @@ class LLMService:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.3,
+            temperature=0.0,
         )
 
         if not isinstance(data, dict):
@@ -262,7 +262,7 @@ class LLMService:
                     {"role": "system", "content": sys_msg},
                     {"role": "user", "content": user_msg},
                 ],
-                temperature=0.2,
+                temperature=0.0,
             )
 
             if isinstance(data, dict):
