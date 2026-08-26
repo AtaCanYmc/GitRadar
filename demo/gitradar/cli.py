@@ -24,6 +24,7 @@ console = Console()
 def analyze(
     idea: str = typer.Argument(..., help="Project idea to analyze (e.g. 'AI code review tool for git hooks')"),
     limit: int = typer.Option(10, "--limit", "-l", help="Maximum repositories to fetch and evaluate"),
+    min_relevance: int = typer.Option(50, "--min-relevance", "-r", help="Minimum relevance score threshold (0-100%)"),
     model: Optional[str] = typer.Option(None, "--model", "-m", help="Override LiteLLM model"),
     language: Optional[str] = typer.Option(None, "--lang", "--language", help="Output language for AI report (e.g. 'Turkish', 'English', 'Spanish')"),
 ):
@@ -55,11 +56,11 @@ def analyze(
             raise typer.Exit(code=1)
 
         # Step 2b: Relevance Evaluation & Hybrid Ranking
-        with Status("[bold cyan]⚖️ Evaluating relevance match & computing hybrid rankings...[/bold cyan]", spinner="dots"):
+        with Status(f"[bold cyan]⚖️ Evaluating relevance match & filtering by threshold (≥{min_relevance}%)...[/bold cyan]", spinner="dots"):
             evaluated_repos = llm_service.evaluate_repository_relevance(idea, candidate_repos, language=language)
-            repos = github_service.rank_and_sort_by_relevance(evaluated_repos, limit=limit)
+            repos = github_service.rank_and_sort_by_relevance(evaluated_repos, limit=limit, min_relevance=min_relevance)
 
-        ui.display_repo_table(repos, title=f"Repositories Related to '{idea}'")
+        ui.display_repo_table(repos, title=f"Repositories Related to '{idea}' (Threshold: ≥{min_relevance}%)")
 
         # Step 3: Semantic Gap Analysis with LLM
         with Status("[bold cyan]🎯 Semantically evaluating candidate repos & synthesizing Market & Gap Report...[/bold cyan]", spinner="bouncingBar"):

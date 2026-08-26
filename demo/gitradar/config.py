@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     default_model: str = "groq/llama-3.1-8b-instant"
     default_language: str = "English"
     max_repos_to_analyze: int = 10
+    min_relevance_threshold: int = 50
 
     model_config = SettingsConfigDict(
         env_file=(str(CONFIG_FILE), ".env"),
@@ -21,15 +22,15 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @field_validator("max_repos_to_analyze", mode="before")
+    @field_validator("max_repos_to_analyze", "min_relevance_threshold", mode="before")
     @classmethod
-    def validate_max_repos(cls, v):
+    def validate_int_settings(cls, v):
         if v is None or (isinstance(v, str) and v.strip() == ""):
-            return 10
+            return 50 if "min_relevance" in str(v) else 10
         try:
             return int(v)
         except (ValueError, TypeError):
-            return 10
+            return 50
 
     @field_validator("groq_api_key", "github_token", "default_model", "default_language", mode="before")
     @classmethod

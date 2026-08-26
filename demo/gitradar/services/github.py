@@ -99,14 +99,18 @@ class GitHubService:
 
         queries = []
         if keywords:
-            queries.append(" ".join(keywords[:4]))
-            for kw in keywords[:3]:
-                if kw not in queries:
-                    queries.append(kw)
+            for kw in keywords:
+                kw_clean = kw.strip()
+                if kw_clean and kw_clean not in queries:
+                    queries.append(kw_clean)
 
         if topics:
-            for topic in topics[:2]:
-                queries.append(f"topic:{topic}")
+            for topic in topics[:3]:
+                topic_clean = topic.strip().replace(" ", "-").lower()
+                if topic_clean and topic_clean not in ["python", "machine-learning", "deep-learning", "ai", "artificial-intelligence"]:
+                    t_query = f"topic:{topic_clean}"
+                    if t_query not in queries:
+                        queries.append(t_query)
 
         tasks = [self.search_repositories(q, limit=limit) for q in queries]
         search_results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -135,10 +139,12 @@ class GitHubService:
     def rank_and_sort_by_relevance(
         self,
         repos: List[RepositoryInfo],
-        limit: int = 10
+        limit: int = 10,
+        min_relevance: int = 50,
     ) -> List[RepositoryInfo]:
         """
-        Calculate hybrid score for each repository and sort by hybrid score desc.
+        Calculate hybrid score for each repository, filter out repos below min_relevance threshold,
+        and sort by hybrid score desc.
         Hybrid Score = (Relevance Score * 0.7) + (Normalized Star Score * 0.3)
         """
         if not repos:
@@ -152,8 +158,21 @@ class GitHubService:
             star_score = min(100.0, (math.log10(r.stars + 1) / math.log10(max(max_stars, 10) + 1)) * 100.0) if max_stars > 0 else 50.0
             r.hybrid_score = round((rel_score * 0.7) + (star_score * 0.3), 1)
 
+        # Enforce minimum relevance threshold filtering
+        filtered_repos = [
+            r for r in repos
+            if r.relevance_score is not None and r.relevance_score >= min_relevance
+        ]
+
+        if not filtered_repos:
+            fallback_threshold = max(30, min_relevance - 20)
+            filtered_repos = [
+                r for r in repos
+                if r.relevance_score is not None and r.relevance_score >= fallback_threshold
+            ]
+
         sorted_repos = sorted(
-            repos,
+            filtered_repos if filtered_repos else repos,
             key=lambda r: (r.hybrid_score, r.stars),
             reverse=True
         )

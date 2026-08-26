@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingReportLangSelect = document.getElementById('setting-report-lang-select');
   const settingModelSelect = document.getElementById('setting-model-select');
   const settingLimitInput = document.getElementById('setting-limit-input');
+  const settingMinRelevanceInput = document.getElementById('setting-min-relevance-input');
   const settingGroqKey = document.getElementById('setting-groq-key');
   const settingGithubToken = document.getElementById('setting-github-token');
 
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (customSettings.language) settingReportLangSelect.value = customSettings.language;
     if (customSettings.model) settingModelSelect.value = customSettings.model;
     if (customSettings.limit) settingLimitInput.value = customSettings.limit;
+    if (customSettings.minRelevance) settingMinRelevanceInput.value = customSettings.minRelevance;
     if (customSettings.groqKey) settingGroqKey.value = customSettings.groqKey;
     if (customSettings.githubToken) settingGithubToken.value = customSettings.githubToken;
   }
@@ -74,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
       language: settingReportLangSelect.value,
       model: settingModelSelect.value,
       limit: parseInt(settingLimitInput.value, 10) || 10,
+      minRelevance: parseInt(settingMinRelevanceInput.value, 10) || 50,
       groqKey: settingGroqKey.value.trim(),
       githubToken: settingGithubToken.value.trim(),
     };
@@ -166,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setting_report_lang: "AI Response Language",
       setting_model: "LLM Model",
       setting_limit: "Max Repositories to Analyze",
+      setting_min_relevance: "Min Relevance Threshold (%)",
       setting_groq_key: "Groq API Key",
       setting_github_token: "GitHub Access Token (Optional)",
       btn_cancel: "Cancel",
@@ -228,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setting_report_lang: "Yapay Zeka Yanıt Dili",
       setting_model: "LLM Modeli",
       setting_limit: "Analiz Edilecek Maks. Depo Sayısı",
+      setting_min_relevance: "Min Uygunluk Eşiği (%)",
       setting_groq_key: "Groq API Anahtarı",
       setting_github_token: "GitHub Erişim Jetonu (İsteğe Bağlı)",
       btn_cancel: "İptal",
@@ -488,6 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeGroqKey = sanitizeHeaderValue(settingGroqKey.value || customSettings.groqKey);
     const activeGithubToken = sanitizeHeaderValue(settingGithubToken.value || customSettings.githubToken);
     const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
+    const min_relevance = parseInt(settingMinRelevanceInput.value, 10) || customSettings.minRelevance || 50;
     const model = settingModelSelect.value || customSettings.model || 'groq/openai/gpt-oss-120b';
     const language = settingReportLangSelect.value || customSettings.language || (currentLang === 'tr' ? 'Turkish' : 'English');
 
@@ -496,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
       language,
       model,
       limit,
+      minRelevance: min_relevance,
       groqKey: activeGroqKey,
       githubToken: activeGithubToken,
     };
@@ -512,6 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           idea,
           limit,
+          min_relevance,
           model,
           language,
           groq_key: activeGroqKey || undefined,

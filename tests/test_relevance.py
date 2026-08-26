@@ -45,4 +45,31 @@ def test_hybrid_ranking_algorithm():
 
     # The 95% relevant niche repo should outrank the 20% relevant generic high-star repo
     assert sorted_repos[0].full_name == "niche/terminal-code-reviewer"
-    assert sorted_repos[0].hybrid_score > sorted_repos[1].hybrid_score
+
+
+def test_relevance_threshold_filtering():
+    github_service = GitHubService()
+
+    repo_high = RepositoryInfo(
+        full_name="relevant/tool",
+        name="tool",
+        owner="relevant",
+        html_url="https://github.com/relevant/tool",
+        stars=100,
+        relevance_score=80,
+    )
+    repo_low = RepositoryInfo(
+        full_name="irrelevant/generic-framework",
+        name="generic-framework",
+        owner="irrelevant",
+        html_url="https://github.com/irrelevant/generic-framework",
+        stars=10000,
+        relevance_score=25,
+    )
+
+    repos = [repo_high, repo_low]
+    # Filter with min_relevance = 50 (should discard repo_low which has relevance_score=25)
+    filtered = github_service.rank_and_sort_by_relevance(repos, limit=10, min_relevance=50)
+
+    assert len(filtered) == 1
+    assert filtered[0].full_name == "relevant/tool"

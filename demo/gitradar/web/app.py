@@ -99,9 +99,14 @@ def create_app() -> Flask:
                 )
             )
 
+            try:
+                min_relevance = int(data.get("min_relevance") or data.get("minRelevance") or settings.min_relevance_threshold)
+            except (ValueError, TypeError):
+                min_relevance = settings.min_relevance_threshold
+
             # 3. Relevance Evaluation & Hybrid Ranking
             eval_repos = llm_service.evaluate_repository_relevance(idea, raw_repos, language=language)
-            repos = github_service.rank_and_sort_by_relevance(eval_repos, limit=limit)
+            repos = github_service.rank_and_sort_by_relevance(eval_repos, limit=limit, min_relevance=min_relevance)
 
             # 4. Perform Gap Analysis
             report = llm_service.analyze_market_and_gaps(idea, repos, language=language)
