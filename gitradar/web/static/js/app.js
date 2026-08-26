@@ -293,6 +293,14 @@ document.addEventListener('DOMContentLoaded', () => {
     ideaInput.setAttribute('placeholder', t.idea_placeholder);
     searchInput.setAttribute('placeholder', t.search_placeholder);
 
+    // Sync AI response language dropdown with active UI language
+    const targetLangName = lang === 'tr' ? 'Turkish' : 'English';
+    if (settingReportLangSelect) {
+      settingReportLangSelect.value = targetLangName;
+    }
+    customSettings.language = targetLangName;
+    localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
+
     // If report is already rendered, re-render texts where applicable
     if (window.lastReportData) {
       renderResults(window.lastReportData);
@@ -495,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
     const min_relevance = parseInt(settingMinRelevanceInput.value, 10) || customSettings.minRelevance || 50;
     const model = settingModelSelect.value || customSettings.model || 'groq/openai/gpt-oss-120b';
-    const language = settingReportLangSelect.value || customSettings.language || (currentLang === 'tr' ? 'Turkish' : 'English');
+    const language = currentLang === 'tr' ? 'Turkish' : (settingReportLangSelect.value || customSettings.language || 'English');
 
     // Keep customSettings synced
     customSettings = {
