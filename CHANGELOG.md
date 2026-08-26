@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.4](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.3...v0.1.4) (2026-08-26)
+
+
+### Features
+
+* add minimum relevance threshold input and filtering for repository evaluation ([bfc56cb](https://github.com/AtaCanYmc/GitRadar/commit/bfc56cb49da96ea86961db98f669b90a2cad3820))
+* add relevance scoring and display for discovered repositories ([e330512](https://github.com/AtaCanYmc/GitRadar/commit/e33051297b7c138a01135e530edd90bb1b79f0cc))
+* implement relevance evaluation system for GitHub repositories ([70c0ffd](https://github.com/AtaCanYmc/GitRadar/commit/70c0ffdad09dcf4b54eab78f1e433277262b6414))
+* increase maximum repositories to analyze and adjust sorting criteria for improved relevance evaluation ([adcd024](https://github.com/AtaCanYmc/GitRadar/commit/adcd0247139c0023ee7e9a90e6f941621709b282))
+* synchronize AI response language with active UI language and update report generation instructions ([fa27a96](https://github.com/AtaCanYmc/GitRadar/commit/fa27a96cee35ae728577d575ee5933d902fca7f1))
+* update input fields to textareas for improved user experience and add Enter key functionality ([8cef591](https://github.com/AtaCanYmc/GitRadar/commit/8cef5919f1494bdd9a6431fbce06fe19befa4cdf))
+* update version to 0.1.3 and enhance mobile responsiveness with comprehensive media queries ([df97d6b](https://github.com/AtaCanYmc/GitRadar/commit/df97d6b40e40aef63d012fca3db8e353f9aec951))
+
 ## [0.1.3](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.2...v0.1.3) (2026-08-24)
 
 
