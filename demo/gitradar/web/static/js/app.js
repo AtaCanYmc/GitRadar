@@ -43,6 +43,54 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentTheme = localStorage.getItem('gitradar_theme') || 'dark';
   let currentLang = localStorage.getItem('gitradar_lang') || 'en';
 
+  // Theme Controls
+  function applyTheme(theme) {
+    currentTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+
+    // Synchronize modal segmented theme buttons
+    document.querySelectorAll('[data-theme-choice]').forEach(btn => {
+      if (btn.getAttribute('data-theme-choice') === theme) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    const themeMoonIcon = document.getElementById('theme-moon-icon');
+    const themeSunIcon = document.getElementById('theme-sun-icon');
+    if (themeMoonIcon && themeSunIcon) {
+      if (theme === 'light') {
+        themeMoonIcon.classList.add('hidden');
+        themeSunIcon.classList.remove('hidden');
+      } else {
+        themeSunIcon.classList.add('hidden');
+        themeMoonIcon.classList.remove('hidden');
+      }
+    }
+  }
+
+  applyTheme(currentTheme);
+
+  document.querySelectorAll('[data-theme-choice]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const chosenTheme = btn.getAttribute('data-theme-choice');
+      if (chosenTheme) {
+        applyTheme(chosenTheme);
+        localStorage.setItem('gitradar_theme', chosenTheme);
+      }
+    });
+  });
+
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme);
+      localStorage.setItem('gitradar_theme', nextTheme);
+    });
+  }
+
   // ==========================================================================
   // Hallmark Custom Tactile Dropdown Component
   // ==========================================================================
@@ -353,55 +401,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setLanguage(currentLang);
 
     closeSettings();
-  });
-
-  // Theme Controls
-  const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  const themeMoonIcon = document.getElementById('theme-moon-icon');
-  const themeSunIcon = document.getElementById('theme-sun-icon');
-
-  function applyTheme(theme) {
-    currentTheme = theme;
-    document.documentElement.setAttribute('data-theme', theme);
-
-    // Synchronize modal segmented theme buttons
-    document.querySelectorAll('[data-theme-choice]').forEach(btn => {
-      if (btn.getAttribute('data-theme-choice') === theme) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-
-    if (themeMoonIcon && themeSunIcon) {
-      if (theme === 'light') {
-        themeMoonIcon.classList.add('hidden');
-        themeSunIcon.classList.remove('hidden');
-      } else {
-        themeSunIcon.classList.add('hidden');
-        themeMoonIcon.classList.remove('hidden');
-      }
-    }
-  }
-
-  applyTheme(currentTheme);
-
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      applyTheme(nextTheme);
-      localStorage.setItem('gitradar_theme', nextTheme);
-    });
-  }
-
-  document.querySelectorAll('[data-theme-choice]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const chosenTheme = btn.getAttribute('data-theme-choice');
-      if (chosenTheme) {
-        applyTheme(chosenTheme);
-        localStorage.setItem('gitradar_theme', chosenTheme);
-      }
-    });
   });
 
   // i18n Translations
