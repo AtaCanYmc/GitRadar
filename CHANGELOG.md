@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.5](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.4...v0.1.5) (2026-09-06)
+
+
+### Features
+
+* add sorting and limit options for repository search with custom dropdowns ([8121211](https://github.com/AtaCanYmc/GitRadar/commit/8121211234294f64a058007b5ebe7ccb0540f80b))
+* enhance theme controls with improved synchronization and toggle functionality ([d68cf0d](https://github.com/AtaCanYmc/GitRadar/commit/d68cf0d9ae82d5ff2ba2dccc46eed3cd83350f83))
+* implement theme and language settings with UI synchronization ([a53e0e5](https://github.com/AtaCanYmc/GitRadar/commit/a53e0e5e9692ab8dc4a963bc88094ff16880d99a))
+* upgrade to version 0.2.0 and transition to OpenAI-compatible API integration ([29aaacd](https://github.com/AtaCanYmc/GitRadar/commit/29aaacdaeb2745192f2ec63355e1c3ce2b64dc9a))
+
 ## [0.2.0] (2026-09-06)
 
 ### Features
