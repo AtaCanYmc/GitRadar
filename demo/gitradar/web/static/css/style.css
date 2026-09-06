@@ -245,6 +245,33 @@ body {
   outline-offset: 2px;
 }
 
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.42rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.825rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.settings-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.settings-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
 /* ==========================================================================
    Navigation Tabs
    ========================================================================== */
@@ -733,7 +760,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 14px;
   width: 100%;
-  max-width: 520px;
+  max-width: 540px;
   box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65), var(--panel-inner-glow);
   overflow: visible;
   animation: modal-fade-in 200ms var(--ease-out);
@@ -782,6 +809,68 @@ body {
   gap: 1.15rem;
   max-height: 75vh;
   overflow-y: auto;
+}
+
+.modal-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-indigo);
+  font-family: var(--font-mono);
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-top: 0.25rem;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+@media (max-width: 520px) {
+  .form-row-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.theme-segmented-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  padding: 0.25rem;
+  border-radius: 9px;
+}
+
+.segmented-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 0.42rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.segmented-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.segmented-btn.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .form-group {

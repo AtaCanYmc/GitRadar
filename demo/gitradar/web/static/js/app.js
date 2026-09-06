@@ -38,8 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingBaseUrl = document.getElementById('setting-base-url');
   const settingGithubToken = document.getElementById('setting-github-token');
 
-  // Load Settings from LocalStorage
+  // Load Settings and Preferences from LocalStorage
   let customSettings = JSON.parse(localStorage.getItem('gitradar_settings') || '{}');
+  let currentTheme = localStorage.getItem('gitradar_theme') || 'dark';
+  let currentLang = localStorage.getItem('gitradar_lang') || 'en';
 
   // ==========================================================================
   // Hallmark Custom Tactile Dropdown Component
@@ -285,6 +287,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Synchronize custom dropdown UIs
     syncCustomDropdown(settingReportLangSelect);
     syncCustomDropdown(settingModelSelect);
+
+    // Synchronize theme & language buttons
+    applyTheme(currentTheme);
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      if (btn.getAttribute('data-lang') === currentLang) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
   }
 
   // Initialize custom dropdowns and populate modal inputs on load
@@ -351,25 +360,49 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeMoonIcon = document.getElementById('theme-moon-icon');
   const themeSunIcon = document.getElementById('theme-sun-icon');
 
-  let currentTheme = localStorage.getItem('gitradar_theme') || 'dark';
-  applyTheme(currentTheme);
-
-  themeToggleBtn.addEventListener('click', () => {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    applyTheme(currentTheme);
-    localStorage.setItem('gitradar_theme', currentTheme);
-  });
-
   function applyTheme(theme) {
+    currentTheme = theme;
     document.documentElement.setAttribute('data-theme', theme);
-    if (theme === 'light') {
-      themeMoonIcon.classList.add('hidden');
-      themeSunIcon.classList.remove('hidden');
-    } else {
-      themeSunIcon.classList.add('hidden');
-      themeMoonIcon.classList.remove('hidden');
+
+    // Synchronize modal segmented theme buttons
+    document.querySelectorAll('[data-theme-choice]').forEach(btn => {
+      if (btn.getAttribute('data-theme-choice') === theme) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    if (themeMoonIcon && themeSunIcon) {
+      if (theme === 'light') {
+        themeMoonIcon.classList.add('hidden');
+        themeSunIcon.classList.remove('hidden');
+      } else {
+        themeSunIcon.classList.add('hidden');
+        themeMoonIcon.classList.remove('hidden');
+      }
     }
   }
+
+  applyTheme(currentTheme);
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme);
+      localStorage.setItem('gitradar_theme', nextTheme);
+    });
+  }
+
+  document.querySelectorAll('[data-theme-choice]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const chosenTheme = btn.getAttribute('data-theme-choice');
+      if (chosenTheme) {
+        applyTheme(chosenTheme);
+        localStorage.setItem('gitradar_theme', chosenTheme);
+      }
+    });
+  });
 
   // i18n Translations
   const TRANSLATIONS = {
@@ -445,6 +478,14 @@ document.addEventListener('DOMContentLoaded', () => {
       limit_10: "10 Repositories",
       limit_20: "20 Repositories",
       limit_30: "30 Repositories",
+      settings_btn: "Settings",
+      modal_section_appearance: "Appearance & Language",
+      setting_theme: "Interface Theme",
+      theme_dark: "Dark Mode",
+      theme_light: "Light Mode",
+      setting_ui_lang: "Interface Language",
+      modal_section_ai: "AI Engine & Model",
+      modal_section_analysis: "Analysis Parameters",
     },
     tr: {
       engine_active: "Servis Aktif",
@@ -493,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
       settings_title: "Yapılandırma Ayarları",
       setting_report_lang: "Yapay Zeka Yanıt Dili",
       setting_model: "LLM Modeli",
-      setting_limit: "Analiz Edilecek Maks. Depo Sayısı",
+      setting_limit: "Maks. Depo Sayısı",
       setting_min_relevance: "Min Uygunluk Eşiği (%)",
       setting_api_key: "OpenAI / Uyumlu API Anahtarı",
       setting_base_url: "Özel API Taban Adresi (İsteğe Bağlı)",
@@ -518,10 +559,18 @@ document.addEventListener('DOMContentLoaded', () => {
       limit_10: "10 Depo",
       limit_20: "20 Depo",
       limit_30: "30 Depo",
+      settings_btn: "Ayarlar",
+      modal_section_appearance: "Görünüm ve Dil",
+      setting_theme: "Arayüz Teması",
+      theme_dark: "Koyu Mod",
+      theme_light: "Açık Mod",
+      setting_ui_lang: "Arayüz Dili",
+      modal_section_ai: "Yapay Zeka Motoru & Model",
+      modal_section_analysis: "Analiz Parametreleri",
     }
   };
 
-  let currentLang = localStorage.getItem('gitradar_lang') || 'en';
+  currentLang = localStorage.getItem('gitradar_lang') || currentLang || 'en';
   setLanguage(currentLang);
 
   document.querySelectorAll('.lang-btn').forEach(btn => {

@@ -39,38 +39,6 @@
           <span data-i18n="engine_active">Engine Active</span>
         </div>
 
-        <!-- Language Switcher -->
-        <div class="lang-switcher">
-          <button class="lang-btn active" data-lang="en">EN</button>
-          <button class="lang-btn" data-lang="tr">TR</button>
-        </div>
-
-        <!-- Theme Toggle -->
-        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
-          <svg id="theme-moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-          <svg id="theme-sun-icon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-        </button>
-
-        <!-- Settings Modal Button -->
-        <button id="open-settings-btn" class="theme-toggle-btn" title="Settings" aria-label="Settings">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-        </button>
-
         <nav class="nav-tabs">
           <button class="nav-tab active" id="tab-analyze-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -88,6 +56,15 @@
             <span data-i18n="tab_search">Repository Search</span>
           </button>
         </nav>
+
+        <!-- Settings Modal Button -->
+        <button id="open-settings-btn" class="settings-btn" title="Settings" aria-label="Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="settings-btn-label" data-i18n="settings_btn">Settings</span>
+        </button>
       </div>
     </header>
 
@@ -431,6 +408,52 @@
       </div>
 
       <div class="modal-body">
+        <!-- Appearance & Language Section -->
+        <div class="modal-section-title" data-i18n="modal_section_appearance">Appearance & Language</div>
+        
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" data-i18n="setting_theme">Interface Theme</label>
+            <div class="theme-segmented-group">
+              <button type="button" class="segmented-btn active" data-theme-choice="dark">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <span data-i18n="theme_dark">Dark Mode</span>
+              </button>
+              <button type="button" class="segmented-btn" data-theme-choice="light">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <span data-i18n="theme_light">Light Mode</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="setting_ui_lang">Interface Language</label>
+            <div class="theme-segmented-group">
+              <button type="button" class="segmented-btn lang-btn active" data-lang="en">
+                <span>English (EN)</span>
+              </button>
+              <button type="button" class="segmented-btn lang-btn" data-lang="tr">
+                <span>Türkçe (TR)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Engine Section -->
+        <div class="modal-section-title" data-i18n="modal_section_ai">AI Engine & Model</div>
+
         <div class="form-group">
           <label class="form-label" data-i18n="setting_report_lang">AI Response Language</label>
           <select id="setting-report-lang-select" class="form-select">
@@ -456,16 +479,6 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" data-i18n="setting_limit">Max Repositories to Analyze</label>
-          <input type="number" id="setting-limit-input" class="input-field" min="5" max="30" value="10" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" data-i18n="setting_min_relevance">Min Relevance Threshold (%)</label>
-          <input type="number" id="setting-min-relevance-input" class="input-field" min="10" max="90" value="50" />
-        </div>
-
-        <div class="form-group">
           <label class="form-label" data-i18n="setting_api_key">OpenAI / Compatible API Key</label>
           <input type="password" id="setting-api-key" class="input-field" placeholder="sk-... or gsk_..." />
         </div>
@@ -473,6 +486,21 @@
         <div class="form-group">
           <label class="form-label" data-i18n="setting_base_url">Custom Base URL (Optional)</label>
           <input type="text" id="setting-base-url" class="input-field" placeholder="https://api.openai.com/v1 (or Groq, Ollama, DeepSeek)" />
+        </div>
+
+        <!-- Analysis Parameters Section -->
+        <div class="modal-section-title" data-i18n="modal_section_analysis">Analysis Parameters</div>
+
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" data-i18n="setting_limit">Max Repositories</label>
+            <input type="number" id="setting-limit-input" class="input-field" min="5" max="30" value="10" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="setting_min_relevance">Min Relevance (%)</label>
+            <input type="number" id="setting-min-relevance-input" class="input-field" min="10" max="90" value="50" />
+          </div>
         </div>
 
         <div class="form-group">
