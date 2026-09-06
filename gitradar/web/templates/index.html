@@ -424,11 +424,14 @@
         <div class="form-group">
           <label class="form-label" data-i18n="setting_model">LLM Model</label>
           <select id="setting-model-select" class="form-select">
-            <option value="groq/openai/gpt-oss-120b">groq/openai/gpt-oss-120b (Default)</option>
-            <option value="groq/qwen/qwen3.6-27b">groq/qwen/qwen3.6-27b</option>
-            <option value="groq/llama-3.3-70b-versatile">groq/llama-3.3-70b-versatile</option>
-            <option value="groq/llama-3.1-8b-instant">groq/llama-3.1-8b-instant</option>
+            <option value="gpt-4o-mini">gpt-4o-mini (OpenAI Default)</option>
+            <option value="gpt-4o">gpt-4o (OpenAI)</option>
+            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Groq / OSS)</option>
+            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Groq Fast)</option>
+            <option value="deepseek-chat">deepseek-chat (DeepSeek)</option>
+            <option value="custom">Custom Model...</option>
           </select>
+          <input type="text" id="setting-custom-model-input" class="input-field hidden" style="margin-top: 6px;" placeholder="e.g. o3-mini, mistral-large, qwen2.5" />
         </div>
 
         <div class="form-group">
@@ -442,8 +445,13 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" data-i18n="setting_groq_key">Groq API Key</label>
-          <input type="password" id="setting-groq-key" class="input-field" placeholder="gsk_..." />
+          <label class="form-label" data-i18n="setting_api_key">OpenAI / Compatible API Key</label>
+          <input type="password" id="setting-api-key" class="input-field" placeholder="sk-... or gsk_..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="setting_base_url">Custom Base URL (Optional)</label>
+          <input type="text" id="setting-base-url" class="input-field" placeholder="https://api.openai.com/v1 (or Groq, Ollama, DeepSeek)" />
         </div>
 
         <div class="form-group">

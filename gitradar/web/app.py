@@ -45,11 +45,13 @@ def create_app() -> Flask:
     @app.route("/api/config", methods=["GET"])
     def get_config():
         return jsonify({
+            "openai_configured": bool(settings.openai_api_key or settings.groq_api_key),
             "groq_configured": bool(settings.groq_api_key),
             "github_configured": bool(settings.github_token),
             "default_model": settings.default_model,
             "default_language": settings.default_language,
             "max_repos_to_analyze": settings.max_repos_to_analyze,
+            "base_url": settings.openai_base_url,
         })
 
     @app.route("/api/analyze", methods=["POST"])
@@ -66,12 +68,23 @@ def create_app() -> Flask:
             cleaned = str(v).replace("\r", "").replace("\n", "").replace("\t", "").strip().strip("'\"")
             return cleaned if cleaned else None
 
-        # Extract user credentials from headers or JSON payload
-        groq_key = clean_key(
-            request.headers.get("X-Groq-Api-Key")
+        # Extract user credentials and OpenAI-compatible endpoint from headers or JSON payload
+        api_key = clean_key(
+            request.headers.get("X-OpenAI-Api-Key")
+            or request.headers.get("X-Groq-Api-Key")
+            or data.get("openai_key")
+            or data.get("openaiKey")
+            or data.get("api_key")
             or data.get("groq_key")
             or data.get("groqKey")
+            or settings.openai_api_key
             or settings.groq_api_key
+        )
+        base_url = clean_key(
+            request.headers.get("X-OpenAI-Base-Url")
+            or data.get("base_url")
+            or data.get("baseUrl")
+            or settings.openai_base_url
         )
         github_token = clean_key(
             request.headers.get("X-Github-Token")
@@ -84,7 +97,7 @@ def create_app() -> Flask:
             return jsonify({"error": "Project idea parameter is required."}), 400
 
         try:
-            llm_service = LLMService(api_key=groq_key, model=model, language=language)
+            llm_service = LLMService(api_key=api_key, base_url=base_url, model=model, language=language)
             github_service = GitHubService(token=github_token)
 
             # 1. Expand Queries
@@ -121,8 +134,8 @@ def create_app() -> Flask:
             return jsonify({"error": str(ve)}), 400
         except Exception as e:
             err_msg = str(e)
-            if any(k in err_msg.lower() for k in ["invalid_api_key", "invalid api key", "groqexception"]):
-                err_msg = "Invalid Groq API Key! Please click the Settings Modal (⚙️) in the top-right corner and enter a valid Groq API Key (gsk_...). Get a free key at https://console.groq.com"
+            if any(k in err_msg.lower() for k in ["invalid_api_key", "invalid api key", "authentication", "unauthorized"]):
+                err_msg = "Invalid AI API Key! Please click the Settings Modal (⚙️) in the top-right corner and enter a valid API Key."
             return jsonify({"error": err_msg}), 400
 
     @app.route("/api/search", methods=["POST"])

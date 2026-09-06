@@ -9,9 +9,11 @@ CONFIG_FILE = CONFIG_DIR / "config.env"
 
 
 class Settings(BaseSettings):
+    openai_api_key: Optional[str] = None
+    openai_base_url: Optional[str] = None
     groq_api_key: Optional[str] = None
     github_token: Optional[str] = None
-    default_model: str = "groq/llama-3.1-8b-instant"
+    default_model: str = "gpt-4o-mini"
     default_language: str = "English"
     max_repos_to_analyze: int = 50
     min_relevance_threshold: int = 50
@@ -21,6 +23,18 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @property
+    def effective_api_key(self) -> Optional[str]:
+        return self.openai_api_key or self.groq_api_key
+
+    @property
+    def effective_base_url(self) -> Optional[str]:
+        if self.openai_base_url:
+            return self.openai_base_url
+        if not self.openai_api_key and self.groq_api_key:
+            return "https://api.groq.com/openai/v1"
+        return None
 
     @field_validator("max_repos_to_analyze", "min_relevance_threshold", mode="before")
     @classmethod
@@ -32,7 +46,7 @@ class Settings(BaseSettings):
         except (ValueError, TypeError):
             return 50
 
-    @field_validator("groq_api_key", "github_token", "default_model", "default_language", mode="before")
+    @field_validator("openai_api_key", "openai_base_url", "groq_api_key", "github_token", "default_model", "default_language", mode="before")
     @classmethod
     def validate_empty_strings(cls, v):
         if isinstance(v, str) and v.strip() == "":
@@ -43,18 +57,29 @@ class Settings(BaseSettings):
 def load_settings() -> Settings:
     """Load settings from env vars or config files safely."""
     try:
-        return Settings()
+        s = Settings()
     except Exception:
         try:
-            return Settings(_env_file=None)
+            s = Settings(_env_file=None)
         except Exception:
-            return Settings.model_construct(
+            s = Settings.model_construct(
+                openai_api_key=None,
+                openai_base_url=None,
                 groq_api_key=None,
                 github_token=None,
-                default_model="groq/llama-3.1-8b-instant",
+                default_model="gpt-4o-mini",
                 default_language="English",
                 max_repos_to_analyze=50,
+                min_relevance_threshold=50,
             )
+
+    if not s.openai_base_url:
+        s.openai_base_url = os.environ.get("OPENAI_BASE_URL") or os.environ.get("OPENAI_API_BASE")
+    if not s.openai_api_key:
+        s.openai_api_key = os.environ.get("OPENAI_API_KEY")
+    if s.default_model == "gpt-4o-mini" and os.environ.get("OPENAI_MODEL"):
+        s.default_model = os.environ["OPENAI_MODEL"]
+    return s
 
 
 def save_setting(key: str, value: str) -> None:

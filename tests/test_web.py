@@ -23,3 +23,23 @@ def test_web_config_endpoint(app_client):
     data = response.get_json()
     assert "default_model" in data
     assert "max_repos_to_analyze" in data
+    assert "openai_configured" in data
+
+
+def test_web_analyze_missing_idea(app_client):
+    response = app_client.post("/api/analyze", json={})
+    assert response.status_code == 400
+    data = response.get_json()
+    assert "required" in data["error"].lower()
+
+
+def test_web_analyze_invalid_key_error(app_client):
+    response = app_client.post(
+        "/api/analyze",
+        headers={"X-OpenAI-Api-Key": "sk-invalid-fake-key-12345"},
+        json={"idea": "Test idea"}
+    )
+    assert response.status_code == 400
+    data = response.get_json()
+    assert "error" in data
+

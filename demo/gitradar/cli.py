@@ -25,14 +25,16 @@ def analyze(
     idea: str = typer.Argument(..., help="Project idea to analyze (e.g. 'AI code review tool for git hooks')"),
     limit: int = typer.Option(10, "--limit", "-l", help="Maximum repositories to fetch and evaluate"),
     min_relevance: int = typer.Option(50, "--min-relevance", "-r", help="Minimum relevance score threshold (0-100%)"),
-    model: Optional[str] = typer.Option(None, "--model", "-m", help="Override LiteLLM model"),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="Override AI model (e.g. 'gpt-4o-mini', 'llama-3.3-70b-versatile')"),
+    api_key: Optional[str] = typer.Option(None, "--api-key", "-k", help="Override OpenAI or compatible API Key"),
+    base_url: Optional[str] = typer.Option(None, "--base-url", "-u", help="Override OpenAI-compatible base URL"),
     language: Optional[str] = typer.Option(None, "--lang", "--language", help="Output language for AI report (e.g. 'Turkish', 'English', 'Spanish')"),
 ):
     """Run full AI-driven market and gap analysis workflow on a project idea."""
     ui.display_banner()
 
     try:
-        llm_service = LLMService(model=model, language=language)
+        llm_service = LLMService(api_key=api_key, base_url=base_url, model=model, language=language)
         github_service = GitHubService()
 
         # Step 1: Query Expansion with LLM
@@ -122,15 +124,27 @@ def ui_command(
 @app.command(name="config", help="⚙️ View or configure GitRadar API credentials and preferences.")
 def config_command(
     show: bool = typer.Option(False, "--show", help="Display current configuration"),
-    groq_api_key: Optional[str] = typer.Option(None, "--groq-api-key", help="Save Groq API Key credential"),
+    openai_api_key: Optional[str] = typer.Option(None, "--openai-api-key", "-k", help="Save OpenAI or compatible API Key credential"),
+    base_url: Optional[str] = typer.Option(None, "--base-url", "-u", help="Save custom OpenAI-compatible Base URL (e.g. https://api.groq.com/openai/v1, http://localhost:11434/v1)"),
+    groq_api_key: Optional[str] = typer.Option(None, "--groq-api-key", help="Save Groq API Key credential (legacy / fallback)"),
     github_token: Optional[str] = typer.Option(None, "--github-token", help="Save GitHub Access Token credential"),
-    default_model: Optional[str] = typer.Option(None, "--model", help="Save default LiteLLM model identifier"),
+    default_model: Optional[str] = typer.Option(None, "--model", help="Save default AI model identifier (e.g. gpt-4o-mini, llama-3.3-70b-versatile)"),
     default_language: Optional[str] = typer.Option(None, "--lang", "--language", help="Save default response language for AI reports"),
 ):
     """Manage GitRadar configuration."""
     ui.display_banner()
 
     updated = False
+    if openai_api_key:
+        save_setting("OPENAI_API_KEY", openai_api_key)
+        ui.display_info("OPENAI_API_KEY successfully saved! 🔑")
+        updated = True
+
+    if base_url:
+        save_setting("OPENAI_BASE_URL", base_url)
+        ui.display_info(f"OPENAI_BASE_URL saved as '{base_url}'! 🌐")
+        updated = True
+
     if groq_api_key:
         save_setting("GROQ_API_KEY", groq_api_key)
         ui.display_info("GROQ_API_KEY successfully saved! 🔑")
@@ -157,17 +171,30 @@ def config_command(
         grid.add_column("Parameter", style="bold cyan")
         grid.add_column("Value", style="white")
 
+        openai_val = curr_settings.openai_api_key
+        masked_openai = f"{openai_val[:6]}...{openai_val[-4:]}" if openai_val and len(openai_val) > 10 else ("Configured" if openai_val else "[red]Not Configured[/red]")
+
         groq_val = curr_settings.groq_api_key
-        masked_groq = f"{groq_val[:6]}...{groq_val[-4:]}" if groq_val and len(groq_val) > 10 else ("Configured" if groq_val else "[red]Not Configured[/red]")
+        masked_groq = f"{groq_val[:6]}...{groq_val[-4:]}" if groq_val and len(groq_val) > 10 else ("Configured" if groq_val else "[dim]Not Configured[/dim]")
+
+        base_url_val = curr_settings.openai_base_url or (
+            "https://api.groq.com/openai/v1 (Auto-routed from Groq Key)"
+            if not curr_settings.openai_api_key and curr_settings.groq_api_key
+            else "https://api.openai.com/v1 (Default)"
+        )
 
         gh_val = curr_settings.github_token
         masked_gh = f"{gh_val[:4]}...{gh_val[-4:]}" if gh_val and len(gh_val) > 8 else ("Configured (Anonymous Mode)" if not gh_val else "Configured")
 
-        grid.add_row("GROQ_API_KEY", masked_groq)
+        grid.add_row("OPENAI_API_KEY", masked_openai)
+        if groq_val:
+            grid.add_row("GROQ_API_KEY (Legacy)", masked_groq)
+        grid.add_row("OPENAI_BASE_URL", base_url_val)
         grid.add_row("GITHUB_TOKEN", masked_gh)
         grid.add_row("DEFAULT_MODEL", curr_settings.default_model)
         grid.add_row("DEFAULT_LANGUAGE", curr_settings.default_language)
         grid.add_row("MAX_REPOS_TO_ANALYZE", str(curr_settings.max_repos_to_analyze))
+        grid.add_row("MIN_RELEVANCE_THRESHOLD", f"{curr_settings.min_relevance_threshold}%")
 
         console.print(grid)
 

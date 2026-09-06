@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] (2026-09-06)
+
+### Features
+
+* **Direct OpenAI-Format AI Connection**: Migrated from LiteLLM directly to the universal OpenAI connection schema (`openai.OpenAI`), providing native support for OpenAI, Groq, DeepSeek, OpenRouter, and local models (Ollama, vLLM, LM Studio).
+* **Comprehensive Connection Schema**: Added support for custom `--base-url` / `OPENAI_BASE_URL` alongside API keys and model overrides in both CLI and Web Dashboard.
+* **Intelligent Auto-Routing & Backward Compatibility**: Automatically detects Groq keys (`gsk_...` or legacy `GROQ_API_KEY`) and routes to Groq's OpenAI-compatible endpoint with zero breaking changes for existing users.
+* **Custom Model Input**: Added customizable model selection in Web UI settings and CLI.
+* **Improved Test Suite**: Added 14 new unit tests covering OpenAI format initialization, local endpoints, auto-routing, and mock completions.
+* **Faster Startup**: Removed LiteLLM import overhead, speeding up CLI command response and test execution.
+
 ## [0.1.4](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.3...v0.1.4) (2026-08-26)
 
 

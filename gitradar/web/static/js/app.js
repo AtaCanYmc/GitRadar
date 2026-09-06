@@ -29,21 +29,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const settingReportLangSelect = document.getElementById('setting-report-lang-select');
   const settingModelSelect = document.getElementById('setting-model-select');
+  const settingCustomModelInput = document.getElementById('setting-custom-model-input');
   const settingLimitInput = document.getElementById('setting-limit-input');
   const settingMinRelevanceInput = document.getElementById('setting-min-relevance-input');
-  const settingGroqKey = document.getElementById('setting-groq-key');
+  const settingApiKey = document.getElementById('setting-api-key') || document.getElementById('setting-groq-key');
+  const settingBaseUrl = document.getElementById('setting-base-url');
   const settingGithubToken = document.getElementById('setting-github-token');
 
   // Load Settings from LocalStorage
   let customSettings = JSON.parse(localStorage.getItem('gitradar_settings') || '{}');
 
+  if (settingModelSelect) {
+    settingModelSelect.addEventListener('change', () => {
+      if (settingModelSelect.value === 'custom') {
+        if (settingCustomModelInput) {
+          settingCustomModelInput.classList.remove('hidden');
+          settingCustomModelInput.focus();
+        }
+      } else {
+        if (settingCustomModelInput) settingCustomModelInput.classList.add('hidden');
+      }
+    });
+  }
+
   function populateSettingsModal() {
     if (customSettings.language) settingReportLangSelect.value = customSettings.language;
-    if (customSettings.model) settingModelSelect.value = customSettings.model;
+    if (customSettings.model && settingModelSelect) {
+      let found = false;
+      for (let i = 0; i < settingModelSelect.options.length; i++) {
+        if (settingModelSelect.options[i].value === customSettings.model) {
+          settingModelSelect.value = customSettings.model;
+          found = true;
+          break;
+        }
+      }
+      if (!found && customSettings.model !== 'custom') {
+        settingModelSelect.value = 'custom';
+        if (settingCustomModelInput) {
+          settingCustomModelInput.value = customSettings.model;
+          settingCustomModelInput.classList.remove('hidden');
+        }
+      } else if (settingCustomModelInput) {
+        settingCustomModelInput.classList.add('hidden');
+      }
+    }
     if (customSettings.limit) settingLimitInput.value = customSettings.limit;
     if (customSettings.minRelevance) settingMinRelevanceInput.value = customSettings.minRelevance;
-    if (customSettings.groqKey) settingGroqKey.value = customSettings.groqKey;
-    if (customSettings.githubToken) settingGithubToken.value = customSettings.githubToken;
+    const existingKey = customSettings.apiKey || customSettings.openaiKey || customSettings.groqKey;
+    if (existingKey && settingApiKey) settingApiKey.value = existingKey;
+    if (customSettings.baseUrl && settingBaseUrl) settingBaseUrl.value = customSettings.baseUrl;
+    if (customSettings.githubToken && settingGithubToken) settingGithubToken.value = customSettings.githubToken;
   }
 
   // Populate modal inputs on load
@@ -72,12 +107,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   saveSettingsBtn.addEventListener('click', () => {
+    let chosenModel = settingModelSelect.value;
+    if (chosenModel === 'custom' && settingCustomModelInput) {
+      chosenModel = settingCustomModelInput.value.trim() || 'gpt-4o-mini';
+    }
+
+    const enteredKey = settingApiKey ? settingApiKey.value.trim() : '';
+    const enteredBaseUrl = settingBaseUrl ? settingBaseUrl.value.trim() : '';
+
     customSettings = {
       language: settingReportLangSelect.value,
-      model: settingModelSelect.value,
+      model: chosenModel,
       limit: parseInt(settingLimitInput.value, 10) || 10,
       minRelevance: parseInt(settingMinRelevanceInput.value, 10) || 50,
-      groqKey: settingGroqKey.value.trim(),
+      apiKey: enteredKey,
+      openaiKey: enteredKey,
+      baseUrl: enteredBaseUrl,
       githubToken: settingGithubToken.value.trim(),
     };
     localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
@@ -170,6 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setting_model: "LLM Model",
       setting_limit: "Max Repositories to Analyze",
       setting_min_relevance: "Min Relevance Threshold (%)",
+      setting_api_key: "OpenAI / Compatible API Key",
+      setting_base_url: "Custom Base URL (Optional)",
       setting_groq_key: "Groq API Key",
       setting_github_token: "GitHub Access Token (Optional)",
       btn_cancel: "Cancel",
@@ -233,6 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setting_model: "LLM Modeli",
       setting_limit: "Analiz Edilecek Maks. Depo Sayısı",
       setting_min_relevance: "Min Uygunluk Eşiği (%)",
+      setting_api_key: "OpenAI / Uyumlu API Anahtarı",
+      setting_base_url: "Özel API Taban Adresi (İsteğe Bağlı)",
       setting_groq_key: "Groq API Anahtarı",
       setting_github_token: "GitHub Erişim Jetonu (İsteğe Bağlı)",
       btn_cancel: "İptal",
@@ -498,11 +547,22 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
-    const activeGroqKey = sanitizeHeaderValue(settingGroqKey.value || customSettings.groqKey);
+    const activeApiKey = sanitizeHeaderValue(
+      (settingApiKey ? settingApiKey.value : '') || customSettings.apiKey || customSettings.openaiKey || customSettings.groqKey
+    );
+    const activeBaseUrl = sanitizeHeaderValue(
+      (settingBaseUrl ? settingBaseUrl.value : '') || customSettings.baseUrl
+    );
     const activeGithubToken = sanitizeHeaderValue(settingGithubToken.value || customSettings.githubToken);
     const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
     const min_relevance = parseInt(settingMinRelevanceInput.value, 10) || customSettings.minRelevance || 50;
-    const model = settingModelSelect.value || customSettings.model || 'groq/openai/gpt-oss-120b';
+    
+    let model = settingModelSelect.value;
+    if (model === 'custom' && settingCustomModelInput) {
+      model = settingCustomModelInput.value.trim() || 'gpt-4o-mini';
+    }
+    model = model || customSettings.model || 'gpt-4o-mini';
+
     const language = currentLang === 'tr' ? 'Turkish' : (settingReportLangSelect.value || customSettings.language || 'English');
 
     // Keep customSettings synced
@@ -511,13 +571,21 @@ document.addEventListener('DOMContentLoaded', () => {
       model,
       limit,
       minRelevance: min_relevance,
-      groqKey: activeGroqKey,
+      apiKey: activeApiKey,
+      openaiKey: activeApiKey,
+      baseUrl: activeBaseUrl,
       githubToken: activeGithubToken,
     };
     localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
 
     const headers = { 'Content-Type': 'application/json' };
-    if (activeGroqKey) headers['X-Groq-Api-Key'] = activeGroqKey;
+    if (activeApiKey) {
+      headers['X-OpenAI-Api-Key'] = activeApiKey;
+      headers['X-Groq-Api-Key'] = activeApiKey;
+    }
+    if (activeBaseUrl) {
+      headers['X-OpenAI-Base-Url'] = activeBaseUrl;
+    }
     if (activeGithubToken) headers['X-Github-Token'] = activeGithubToken;
 
     try {
@@ -530,7 +598,9 @@ document.addEventListener('DOMContentLoaded', () => {
           min_relevance,
           model,
           language,
-          groq_key: activeGroqKey || undefined,
+          openai_key: activeApiKey || undefined,
+          base_url: activeBaseUrl || undefined,
+          groq_key: activeApiKey || undefined,
           github_token: activeGithubToken || undefined,
         })
       });

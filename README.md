@@ -29,7 +29,7 @@ Before spending weeks building a new side project or open-source tool, GitRadar 
 - *What unique differentiators will make your project stand out?*
 - *How should you architect the software, what technology stack to choose, and what open-source building blocks can you leverage?*
 
-GitRadar expands your raw idea into intelligent GitHub queries, fetches candidate repositories via the GitHub REST API, semantically analyzes competitors using **LiteLLM** & **Groq** (with automatic model discovery), and renders an executive report in your terminal, local **Web Dashboard**, or hosted **Vercel Web Demo**.
+GitRadar expands your raw idea into intelligent GitHub queries, fetches candidate repositories via the GitHub REST API, semantically analyzes competitors using direct **OpenAI-compatible AI connections** (supporting OpenAI, Groq, DeepSeek, OpenRouter, and Ollama), and renders an executive report in your terminal, local **Web Dashboard**, or hosted **Vercel Web Demo**.
 
 ---
 
@@ -74,24 +74,41 @@ pip install -e ".[dev]"
 
 ## 🔑 Configuration
 
-GitRadar uses **Groq** for ultra-fast LLM inference.
+GitRadar uses a universal **OpenAI-compatible connection schema** (`api_key`, `base_url`, `model`). It works out-of-the-box with **OpenAI**, **Groq**, **DeepSeek**, **OpenRouter**, or local self-hosted models (**Ollama**, **vLLM**, **LM Studio**).
 
-1. **Set your Groq API Key**:
+1. **Set your API Key** (OpenAI, Groq, or compatible provider):
    ```bash
-   gitradar config --groq-api-key "gsk_your_groq_api_key_here"
+   # Standard OpenAI
+   gitradar config --openai-api-key "sk-..."
+
+   # Or Groq (auto-routed to Groq OpenAI endpoint)
+   gitradar config --openai-api-key "gsk_..."
+   # Or legacy flag: gitradar config --groq-api-key "gsk_..."
    ```
 
-2. *(Optional)* **Set a GitHub Access Token** to boost API rate limits (from 60 to 5,000 requests/hour):
+2. *(Optional)* **Set a Custom Base URL** for alternative providers:
+   ```bash
+   # Groq
+   gitradar config --base-url "https://api.groq.com/openai/v1" --model "llama-3.3-70b-versatile"
+
+   # DeepSeek
+   gitradar config --base-url "https://api.deepseek.com" --model "deepseek-chat"
+
+   # Local Ollama
+   gitradar config --base-url "http://localhost:11434/v1" --model "llama3.2"
+   ```
+
+3. *(Optional)* **Set a GitHub Access Token** to boost API rate limits (from 60 to 5,000 requests/hour):
    ```bash
    gitradar config --github-token "ghp_your_github_token_here"
    ```
 
-3. *(Optional)* **Set Default Output Language & Model**:
+4. *(Optional)* **Set Default Output Language & Model**:
    ```bash
-   gitradar config --lang Turkish --model groq/openai/gpt-oss-120b
+   gitradar config --lang Turkish --model gpt-4o-mini
    ```
 
-4. **Inspect Active Settings**:
+5. **Inspect Active Settings**:
    ```bash
    gitradar config --show
    ```
@@ -110,7 +127,10 @@ gitradar analyze "AI powered code review tool for terminal and git hooks" --lang
 
 **Options:**
 - `--limit` / `-l`: Maximum repositories to evaluate (Default: `10`)
-- `--model` / `-m`: Override LLM model (e.g. `groq/openai/gpt-oss-120b`, `groq/qwen/qwen3.6-27b`)
+- `--min-relevance` / `-r`: Minimum relevance score threshold percentage (Default: `50`)
+- `--model` / `-m`: Override AI model (e.g. `gpt-4o-mini`, `gpt-4o`, `llama-3.3-70b-versatile`, `deepseek-chat`)
+- `--api-key` / `-k`: Override API Key for this run
+- `--base-url` / `-u`: Override Base URL endpoint for this run
 - `--lang` / `--language`: Set output language for AI report (e.g. `Turkish`, `English`, `Spanish`)
 
 ---
