@@ -10,6 +10,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="GitRadar" />
   <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -27,7 +30,7 @@
           </svg>
         </div>
         <span class="logo-text">GitRadar</span>
-        <span class="logo-badge">v0.1.1</span>
+        <span class="logo-badge">v0.2.0</span>
       </a>
 
       <div class="nav-controls">
@@ -150,7 +153,25 @@
           </svg>
           <textarea id="search-input" class="input-field" rows="2" placeholder="e.g. terminal devtools, git hooks, rust cli..."></textarea>
         </div>
-        <div style="display: flex; justify-content: flex-end;">
+        <div class="search-actions-bar">
+          <div class="search-filters">
+            <div class="filter-item">
+              <label class="filter-label" data-i18n="sort_label">Sort By</label>
+              <select id="search-sort-select" class="form-select form-select-sm">
+                <option value="stars">★ Most Stars</option>
+                <option value="forks">⑂ Most Forks</option>
+                <option value="updated">⏱ Recently Updated</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label class="filter-label" data-i18n="limit_label">Results</label>
+              <select id="search-limit-select" class="form-select form-select-sm">
+                <option value="10">10 Repositories</option>
+                <option value="20">20 Repositories</option>
+                <option value="30">30 Repositories</option>
+              </select>
+            </div>
+          </div>
           <button id="quick-search-btn" class="btn-primary">
             <span data-i18n="search_repos">Search Repositories</span>
           </button>

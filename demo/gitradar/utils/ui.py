@@ -5,6 +5,7 @@ from rich.table import Table
 from rich.text import Text
 from rich.columns import Columns
 from rich.markdown import Markdown
+from gitradar import __version__
 from gitradar.models import ExpandedQueries, GapAnalysisReport, RepositoryInfo
 
 console = Console()
@@ -16,7 +17,7 @@ def display_banner() -> None:
     banner_text.append("📡 ", style="bold cyan")
     banner_text.append("GitRadar", style="bold white on blue")
     banner_text.append("  CLI Market & Gap Analysis Tool  ", style="bold cyan")
-    banner_text.append("[v0.1.0]", style="dim italic white")
+    banner_text.append(f"[v{__version__}]", style="dim italic white")
 
     console.print()
     console.print(Panel(banner_text, border_style="cyan", expand=False))

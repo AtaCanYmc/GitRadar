@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const analyzeBtn = document.getElementById('analyze-btn');
   const searchInput = document.getElementById('search-input');
   const quickSearchBtn = document.getElementById('quick-search-btn');
+  const searchSortSelect = document.getElementById('search-sort-select');
+  const searchLimitSelect = document.getElementById('search-limit-select');
 
   const loading = document.getElementById('loading');
   const errorBox = document.getElementById('error-box');
@@ -29,24 +31,264 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const settingReportLangSelect = document.getElementById('setting-report-lang-select');
   const settingModelSelect = document.getElementById('setting-model-select');
+  const settingCustomModelInput = document.getElementById('setting-custom-model-input');
   const settingLimitInput = document.getElementById('setting-limit-input');
   const settingMinRelevanceInput = document.getElementById('setting-min-relevance-input');
-  const settingGroqKey = document.getElementById('setting-groq-key');
+  const settingApiKey = document.getElementById('setting-api-key') || document.getElementById('setting-groq-key');
+  const settingBaseUrl = document.getElementById('setting-base-url');
   const settingGithubToken = document.getElementById('setting-github-token');
 
   // Load Settings from LocalStorage
   let customSettings = JSON.parse(localStorage.getItem('gitradar_settings') || '{}');
 
-  function populateSettingsModal() {
-    if (customSettings.language) settingReportLangSelect.value = customSettings.language;
-    if (customSettings.model) settingModelSelect.value = customSettings.model;
-    if (customSettings.limit) settingLimitInput.value = customSettings.limit;
-    if (customSettings.minRelevance) settingMinRelevanceInput.value = customSettings.minRelevance;
-    if (customSettings.groqKey) settingGroqKey.value = customSettings.groqKey;
-    if (customSettings.githubToken) settingGithubToken.value = customSettings.githubToken;
+  // ==========================================================================
+  // Hallmark Custom Tactile Dropdown Component
+  // ==========================================================================
+  function initCustomDropdowns() {
+    document.querySelectorAll('select.form-select').forEach(select => {
+      if (select.dataset.customEnhanced) return;
+      select.dataset.customEnhanced = 'true';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'custom-select-wrapper' + (select.classList.contains('form-select-sm') ? ' custom-select-sm' : '');
+
+      select.parentNode.insertBefore(wrapper, select);
+      wrapper.appendChild(select);
+      select.classList.add('visually-hidden-select');
+      select.setAttribute('tabindex', '-1');
+      select.setAttribute('aria-hidden', 'true');
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'custom-select-trigger';
+      trigger.setAttribute('aria-haspopup', 'listbox');
+      trigger.setAttribute('aria-expanded', 'false');
+
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'custom-select-label';
+
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      arrow.setAttribute('class', 'custom-select-arrow');
+      arrow.setAttribute('width', '14');
+      arrow.setAttribute('height', '14');
+      arrow.setAttribute('viewBox', '0 0 24 24');
+      arrow.setAttribute('fill', 'none');
+      arrow.setAttribute('stroke', 'currentColor');
+      arrow.setAttribute('stroke-width', '2');
+      arrow.setAttribute('stroke-linecap', 'round');
+      arrow.setAttribute('stroke-linejoin', 'round');
+      arrow.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
+
+      trigger.appendChild(labelSpan);
+      trigger.appendChild(arrow);
+      wrapper.appendChild(trigger);
+
+      const dropdown = document.createElement('div');
+      dropdown.className = 'custom-select-dropdown';
+      dropdown.setAttribute('role', 'listbox');
+      wrapper.appendChild(dropdown);
+
+      function updateTriggerAndOptions() {
+        const curIdx = select.selectedIndex >= 0 ? select.selectedIndex : 0;
+        const curOpt = select.options[curIdx];
+        labelSpan.textContent = curOpt ? curOpt.text : '';
+
+        dropdown.querySelectorAll('.custom-select-option').forEach((el, idx) => {
+          if (idx === curIdx) {
+            el.classList.add('is-selected');
+          } else {
+            el.classList.remove('is-selected');
+          }
+        });
+      }
+
+      function buildOptionElements() {
+        dropdown.innerHTML = '';
+        const curIdx = select.selectedIndex >= 0 ? select.selectedIndex : 0;
+        const curOpt = select.options[curIdx];
+        labelSpan.textContent = curOpt ? curOpt.text : '';
+
+        Array.from(select.options).forEach((opt, idx) => {
+          const optEl = document.createElement('div');
+          optEl.className = 'custom-select-option' + (idx === curIdx ? ' is-selected' : '');
+          optEl.setAttribute('role', 'option');
+          optEl.setAttribute('data-value', opt.value);
+
+          const textSpan = document.createElement('span');
+          textSpan.textContent = opt.text;
+          optEl.appendChild(textSpan);
+
+          const check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          check.setAttribute('class', 'check-icon');
+          check.setAttribute('width', '14');
+          check.setAttribute('height', '14');
+          check.setAttribute('viewBox', '0 0 24 24');
+          check.setAttribute('fill', 'none');
+          check.setAttribute('stroke', 'currentColor');
+          check.setAttribute('stroke-width', '2.5');
+          check.setAttribute('stroke-linecap', 'round');
+          check.setAttribute('stroke-linejoin', 'round');
+          check.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+          optEl.appendChild(check);
+
+          optEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            select.selectedIndex = idx;
+            select.value = opt.value;
+            updateTriggerAndOptions();
+            closeDropdown();
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+
+          dropdown.appendChild(optEl);
+        });
+      }
+
+      function closeDropdown() {
+        wrapper.classList.remove('is-open');
+        wrapper.classList.remove('drop-up');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggleDropdown() {
+        const isOpen = wrapper.classList.contains('is-open');
+        document.querySelectorAll('.custom-select-wrapper.is-open').forEach(w => {
+          if (w !== wrapper) {
+            w.classList.remove('is-open');
+            w.classList.remove('drop-up');
+            const tr = w.querySelector('.custom-select-trigger');
+            if (tr) tr.setAttribute('aria-expanded', 'false');
+          }
+        });
+        if (isOpen) {
+          closeDropdown();
+        } else {
+          const rect = trigger.getBoundingClientRect();
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const spaceAbove = rect.top;
+          if (spaceBelow < 230 && spaceAbove > spaceBelow) {
+            wrapper.classList.add('drop-up');
+          } else {
+            wrapper.classList.remove('drop-up');
+          }
+
+          wrapper.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+          const sel = dropdown.querySelector('.custom-select-option.is-selected');
+          if (sel) sel.scrollIntoView({ block: 'nearest' });
+        }
+      }
+
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleDropdown();
+      });
+
+      trigger.addEventListener('keydown', (e) => {
+        const isOpen = wrapper.classList.contains('is-open');
+        if (e.key === 'ArrowDown' || e.key === 'Down') {
+          e.preventDefault();
+          if (!isOpen) {
+            toggleDropdown();
+          } else if (select.selectedIndex < select.options.length - 1) {
+            select.selectedIndex++;
+            updateTriggerAndOptions();
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        } else if (e.key === 'ArrowUp' || e.key === 'Up') {
+          e.preventDefault();
+          if (!isOpen) {
+            toggleDropdown();
+          } else if (select.selectedIndex > 0) {
+            select.selectedIndex--;
+            updateTriggerAndOptions();
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        } else if (e.key === 'Escape') {
+          if (isOpen) {
+            e.preventDefault();
+            closeDropdown();
+          }
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleDropdown();
+        }
+      });
+
+      select._syncDropdown = updateTriggerAndOptions;
+      select._rebuildDropdown = buildOptionElements;
+
+      buildOptionElements();
+    });
   }
 
-  // Populate modal inputs on load
+  function syncCustomDropdown(selectEl) {
+    if (selectEl && typeof selectEl._syncDropdown === 'function') {
+      selectEl._syncDropdown();
+    }
+  }
+
+  // Dismiss dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-select-wrapper')) {
+      document.querySelectorAll('.custom-select-wrapper.is-open').forEach(w => {
+        w.classList.remove('is-open');
+        w.classList.remove('drop-up');
+        const tr = w.querySelector('.custom-select-trigger');
+        if (tr) tr.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  if (settingModelSelect) {
+    settingModelSelect.addEventListener('change', () => {
+      if (settingModelSelect.value === 'custom') {
+        if (settingCustomModelInput) {
+          settingCustomModelInput.classList.remove('hidden');
+          settingCustomModelInput.focus();
+        }
+      } else {
+        if (settingCustomModelInput) settingCustomModelInput.classList.add('hidden');
+      }
+    });
+  }
+
+  function populateSettingsModal() {
+    if (customSettings.language) settingReportLangSelect.value = customSettings.language;
+    if (customSettings.model && settingModelSelect) {
+      let found = false;
+      for (let i = 0; i < settingModelSelect.options.length; i++) {
+        if (settingModelSelect.options[i].value === customSettings.model) {
+          settingModelSelect.value = customSettings.model;
+          found = true;
+          break;
+        }
+      }
+      if (!found && customSettings.model !== 'custom') {
+        settingModelSelect.value = 'custom';
+        if (settingCustomModelInput) {
+          settingCustomModelInput.value = customSettings.model;
+          settingCustomModelInput.classList.remove('hidden');
+        }
+      } else if (settingCustomModelInput) {
+        settingCustomModelInput.classList.add('hidden');
+      }
+    }
+    if (customSettings.limit) settingLimitInput.value = customSettings.limit;
+    if (customSettings.minRelevance) settingMinRelevanceInput.value = customSettings.minRelevance;
+    const existingKey = customSettings.apiKey || customSettings.openaiKey || customSettings.groqKey;
+    if (existingKey && settingApiKey) settingApiKey.value = existingKey;
+    if (customSettings.baseUrl && settingBaseUrl) settingBaseUrl.value = customSettings.baseUrl;
+    if (customSettings.githubToken && settingGithubToken) settingGithubToken.value = customSettings.githubToken;
+
+    // Synchronize custom dropdown UIs
+    syncCustomDropdown(settingReportLangSelect);
+    syncCustomDropdown(settingModelSelect);
+  }
+
+  // Initialize custom dropdowns and populate modal inputs on load
+  initCustomDropdowns();
   populateSettingsModal();
 
   openSettingsBtn.addEventListener('click', () => {
@@ -72,12 +314,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   saveSettingsBtn.addEventListener('click', () => {
+    let chosenModel = settingModelSelect.value;
+    if (chosenModel === 'custom' && settingCustomModelInput) {
+      chosenModel = settingCustomModelInput.value.trim() || 'gpt-4o-mini';
+    }
+
+    const enteredKey = settingApiKey ? settingApiKey.value.trim() : '';
+    const enteredBaseUrl = settingBaseUrl ? settingBaseUrl.value.trim() : '';
+
     customSettings = {
       language: settingReportLangSelect.value,
-      model: settingModelSelect.value,
+      model: chosenModel,
       limit: parseInt(settingLimitInput.value, 10) || 10,
       minRelevance: parseInt(settingMinRelevanceInput.value, 10) || 50,
-      groqKey: settingGroqKey.value.trim(),
+      apiKey: enteredKey,
+      openaiKey: enteredKey,
+      baseUrl: enteredBaseUrl,
       githubToken: settingGithubToken.value.trim(),
     };
     localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
@@ -170,6 +422,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setting_model: "LLM Model",
       setting_limit: "Max Repositories to Analyze",
       setting_min_relevance: "Min Relevance Threshold (%)",
+      setting_api_key: "OpenAI / Compatible API Key",
+      setting_base_url: "Custom Base URL (Optional)",
       setting_groq_key: "Groq API Key",
       setting_github_token: "GitHub Access Token (Optional)",
       btn_cancel: "Cancel",
@@ -183,6 +437,14 @@ document.addEventListener('DOMContentLoaded', () => {
       btn_export_json: "Export JSON (.json)",
       btn_copy_report: "Copy Report",
       copied_text: "Copied!",
+      sort_label: "Sort By",
+      limit_label: "Results",
+      sort_stars: "★ Most Stars",
+      sort_forks: "⑂ Most Forks",
+      sort_updated: "⏱ Recently Updated",
+      limit_10: "10 Repositories",
+      limit_20: "20 Repositories",
+      limit_30: "30 Repositories",
     },
     tr: {
       engine_active: "Servis Aktif",
@@ -233,6 +495,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setting_model: "LLM Modeli",
       setting_limit: "Analiz Edilecek Maks. Depo Sayısı",
       setting_min_relevance: "Min Uygunluk Eşiği (%)",
+      setting_api_key: "OpenAI / Uyumlu API Anahtarı",
+      setting_base_url: "Özel API Taban Adresi (İsteğe Bağlı)",
       setting_groq_key: "Groq API Anahtarı",
       setting_github_token: "GitHub Erişim Jetonu (İsteğe Bağlı)",
       btn_cancel: "İptal",
@@ -246,6 +510,14 @@ document.addEventListener('DOMContentLoaded', () => {
       btn_export_json: "JSON İndir (.json)",
       btn_copy_report: "Raporu Kopyala",
       copied_text: "Kopyalandı!",
+      sort_label: "Sıralama",
+      limit_label: "Sonuç",
+      sort_stars: "★ En Çok Yıldız",
+      sort_forks: "⑂ En Çok Çatallanma",
+      sort_updated: "⏱ Son Güncellenen",
+      limit_10: "10 Depo",
+      limit_20: "20 Depo",
+      limit_30: "30 Depo",
     }
   };
 
@@ -297,9 +569,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetLangName = lang === 'tr' ? 'Turkish' : 'English';
     if (settingReportLangSelect) {
       settingReportLangSelect.value = targetLangName;
+      syncCustomDropdown(settingReportLangSelect);
     }
     customSettings.language = targetLangName;
     localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
+
+    // Update and rebuild search dropdown options
+    if (searchSortSelect && searchSortSelect.options.length >= 3) {
+      searchSortSelect.options[0].text = t.sort_stars;
+      searchSortSelect.options[1].text = t.sort_forks;
+      searchSortSelect.options[2].text = t.sort_updated;
+      if (typeof searchSortSelect._rebuildDropdown === 'function') {
+        searchSortSelect._rebuildDropdown();
+      }
+    }
+    if (searchLimitSelect && searchLimitSelect.options.length >= 3) {
+      searchLimitSelect.options[0].text = t.limit_10;
+      searchLimitSelect.options[1].text = t.limit_20;
+      searchLimitSelect.options[2].text = t.limit_30;
+      if (typeof searchLimitSelect._rebuildDropdown === 'function') {
+        searchLimitSelect._rebuildDropdown();
+      }
+    }
 
     // If report is already rendered, re-render texts where applicable
     if (window.lastReportData) {
@@ -498,11 +789,22 @@ document.addEventListener('DOMContentLoaded', () => {
     hideError();
     results.classList.add('hidden');
 
-    const activeGroqKey = sanitizeHeaderValue(settingGroqKey.value || customSettings.groqKey);
+    const activeApiKey = sanitizeHeaderValue(
+      (settingApiKey ? settingApiKey.value : '') || customSettings.apiKey || customSettings.openaiKey || customSettings.groqKey
+    );
+    const activeBaseUrl = sanitizeHeaderValue(
+      (settingBaseUrl ? settingBaseUrl.value : '') || customSettings.baseUrl
+    );
     const activeGithubToken = sanitizeHeaderValue(settingGithubToken.value || customSettings.githubToken);
     const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
     const min_relevance = parseInt(settingMinRelevanceInput.value, 10) || customSettings.minRelevance || 50;
-    const model = settingModelSelect.value || customSettings.model || 'groq/openai/gpt-oss-120b';
+    
+    let model = settingModelSelect.value;
+    if (model === 'custom' && settingCustomModelInput) {
+      model = settingCustomModelInput.value.trim() || 'gpt-4o-mini';
+    }
+    model = model || customSettings.model || 'gpt-4o-mini';
+
     const language = currentLang === 'tr' ? 'Turkish' : (settingReportLangSelect.value || customSettings.language || 'English');
 
     // Keep customSettings synced
@@ -511,13 +813,21 @@ document.addEventListener('DOMContentLoaded', () => {
       model,
       limit,
       minRelevance: min_relevance,
-      groqKey: activeGroqKey,
+      apiKey: activeApiKey,
+      openaiKey: activeApiKey,
+      baseUrl: activeBaseUrl,
       githubToken: activeGithubToken,
     };
     localStorage.setItem('gitradar_settings', JSON.stringify(customSettings));
 
     const headers = { 'Content-Type': 'application/json' };
-    if (activeGroqKey) headers['X-Groq-Api-Key'] = activeGroqKey;
+    if (activeApiKey) {
+      headers['X-OpenAI-Api-Key'] = activeApiKey;
+      headers['X-Groq-Api-Key'] = activeApiKey;
+    }
+    if (activeBaseUrl) {
+      headers['X-OpenAI-Base-Url'] = activeBaseUrl;
+    }
     if (activeGithubToken) headers['X-Github-Token'] = activeGithubToken;
 
     try {
@@ -530,7 +840,9 @@ document.addEventListener('DOMContentLoaded', () => {
           min_relevance,
           model,
           language,
-          groq_key: activeGroqKey || undefined,
+          openai_key: activeApiKey || undefined,
+          base_url: activeBaseUrl || undefined,
+          groq_key: activeApiKey || undefined,
           github_token: activeGithubToken || undefined,
         })
       });
@@ -560,7 +872,8 @@ document.addEventListener('DOMContentLoaded', () => {
     results.classList.add('hidden');
 
     const activeGithubToken = sanitizeHeaderValue(settingGithubToken.value || customSettings.githubToken);
-    const limit = parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
+    const limit = (searchLimitSelect ? parseInt(searchLimitSelect.value, 10) : null) || parseInt(settingLimitInput.value, 10) || customSettings.limit || 10;
+    const sort = (searchSortSelect ? searchSortSelect.value : 'stars') || 'stars';
 
     const headers = { 'Content-Type': 'application/json' };
     if (activeGithubToken) headers['X-Github-Token'] = activeGithubToken;
@@ -572,6 +885,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           query,
           limit,
+          sort,
           github_token: activeGithubToken || undefined,
         })
       });

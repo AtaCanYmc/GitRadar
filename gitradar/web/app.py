@@ -143,6 +143,7 @@ def create_app() -> Flask:
         data = request.get_json() or {}
         query = data.get("query", "").strip()
         limit = int(data.get("limit", 10))
+        sort = data.get("sort", "stars")
 
         def clean_key(v):
             if not v:
@@ -162,7 +163,7 @@ def create_app() -> Flask:
 
         try:
             github_service = GitHubService(token=github_token)
-            repos = safe_run_async(github_service.search_repositories(query, limit=limit))
+            repos = safe_run_async(github_service.search_repositories(query, limit=limit, sort=sort))
             return jsonify({
                 "repositories": [r.model_dump() for r in repos]
             })
