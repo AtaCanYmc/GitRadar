@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.6](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.5...v0.1.6) (2026-11-20)
+
+
+### Documentation
+
+* apply well-document governance, anti-slop rewrite, and CI gates ([f64cd3d](https://github.com/AtaCanYmc/GitRadar/commit/f64cd3d552aa27a4021dc7d27bf6169687fbe613))
+* **readme:** replace wide banner with square app icon logo ([b33e7fa](https://github.com/AtaCanYmc/GitRadar/commit/b33e7fa4f48a49d180a32822796113c7a8bd8445))
+
 ## [0.1.5](https://github.com/AtaCanYmc/GitRadar/compare/v0.1.4...v0.1.5) (2026-09-06)
 
 
