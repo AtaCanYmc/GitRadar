@@ -1,7 +1,7 @@
 # GitRadar
 
 <p align="center">
-  <img src="./assets/gitradar-banner.jpg" alt="GitRadar Banner" width="850"/>
+  <img src="./assets/gitradar-logo.png" alt="GitRadar Logo" width="160" height="160"/>
 </p>
 
 <p align="center">
@@ -247,7 +247,7 @@ GitRadar/
 ├── SECURITY.md                  # Vulnerability disclosure policy and response SLA
 ├── pyproject.toml               # Package build manifest and dependencies
 ├── assets/
-│   └── gitradar-banner.jpg      # Repository header graphic
+│   └── gitradar-logo.png        # Square repository logo icon
 ├── demo/                        # Standalone Vercel serverless web demo
 │   ├── README.md                # Scoped documentation for Vercel deployment
 │   ├── api/index.py             # Vercel WSGI serverless entrypoint
