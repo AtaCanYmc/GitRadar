@@ -1,45 +1,51 @@
-# GitRadar Technical Architecture 🏛️
+# GitRadar Technical Architecture
 
-This document outlines the software architecture, component relationships, data flow pipelines, and resiliency strategies of **GitRadar**.
+This document specifies the subsystem boundaries, data schemas, execution sequence, and fault-handling mechanics of GitRadar.
+
+## Table of Contents
+
+- [Architectural Pattern](#architectural-pattern)
+- [Subsystem Specifications](#subsystem-specifications)
+- [End-to-End Sequence Flow](#end-to-end-sequence-flow)
+- [Hybrid Relevance Scoring Formula](#hybrid-relevance-scoring-formula)
+- [Error and Exception Matrix](#error-and-exception-matrix)
 
 ---
 
-## 📐 High-Level Architectural Pattern
+## Architectural Pattern
 
-GitRadar adopts a modular, layer-decoupled architecture separating **Presentation** (Terminal CLI, Local Web UI, & Vercel Serverless Demo), **Domain Services** (GitHub REST API & LLM Orchestration), **Prompt Engine** (Jinja2 Templates), and **Persistence** (Pydantic Settings & LocalStorage).
+GitRadar uses a four-layer decoupled architecture separating presentation interfaces, domain services, prompt templates and data models, and external REST APIs.
 
 ```mermaid
-graph TD
+flowchart TD
     subgraph PresentationLayer["Presentation Layer"]
         CLI["Typer CLI (gitradar.cli)"]
         WebUI["Flask Web App (gitradar.web)"]
-        VercelDemo["Vercel Web Demo (demo/)"]
+        VercelDemo["Vercel Serverless Demo (demo/)"]
         RichUI["Rich Terminal Renderer (gitradar.utils.ui)"]
     end
 
     subgraph ServiceLayer["Service Layer"]
-        LLM["LLM Service (gitradar.services.llm)"]
-        GH["GitHub Service (gitradar.services.github)"]
+        LLM["LLMService (gitradar.services.llm)"]
+        GH["GitHubService (gitradar.services.github)"]
     end
 
     subgraph DataLayer["Data & Prompt Layer"]
         Prompts["Jinja2 Prompt Engine (gitradar.prompts)"]
         Models["Pydantic Schemas (gitradar.models)"]
-        Config["Config Manager (gitradar.config)"]
+        Config["Settings Loader (gitradar.config)"]
     end
 
     subgraph ExternalAPIs["External APIs"]
-        AIAPI["OpenAI-Compatible REST API (OpenAI, Groq, DeepSeek, Ollama, etc.)"]
-        GitHubAPI["GitHub REST API (v3)"]
+        AIAPI["OpenAI-Compatible API (OpenAI, Groq, DeepSeek, Ollama)"]
+        GitHubAPI["GitHub REST API v3"]
     end
 
     CLI --> LLM
     CLI --> GH
     CLI --> RichUI
-    
     WebUI --> LLM
     WebUI --> GH
-
     VercelDemo --> LLM
     VercelDemo --> GH
 
@@ -58,41 +64,45 @@ graph TD
 
 ---
 
-## 📦 Component Details
+## Subsystem Specifications
 
 ### 1. Presentation Layer
-- **CLI (`gitradar/cli.py`)**: Built on `typer`. Defines commands (`analyze`, `ui`, `search`, `config`, `version`), manages options/arguments (including `--lang`, `--api-key`, `--base-url`, `--model`), handles async runtime execution via `asyncio.run()`, and controls terminal status spinners.
-- **Local Web UI (`gitradar/web/`)**: Built on `flask`. Hosts a single-page web dashboard (`/`), JSON REST endpoints (`/api/analyze`, `/api/search`, `/api/config`), serves static assets, and supports full report exporting (`.md`, `.json`, clipboard).
-- **Vercel Web Demo (`demo/`)**: Standalone, Vercel-ready serverless environment (`demo/api/index.py` & `@vercel/python`). Accepts user-provided OpenAI/Groq API keys (`X-OpenAI-Api-Key`, `X-Groq-Api-Key`), custom base URLs (`X-OpenAI-Base-Url`), and GitHub Access Tokens (`X-Github-Token`) via HTTPS headers for zero-server-state hosting.
-- **Rich UI (`gitradar/utils/ui.py`)**: Renders stylized terminal banners, query strategy panels, repository tables, gap report panels, and technical implementation roadmaps.
+- **CLI (`gitradar/cli.py`)**: Built with `typer`. Exposes `analyze`, `search`, `ui`, `config`, and `version` subcommands. Bridges synchronous CLI entrypoints to async HTTP operations via `asyncio.run()`.
+- **Local Web UI (`gitradar/web/app.py`)**: Built with `flask`. Exposes `GET /`, `GET /api/config`, `POST /api/analyze`, and `POST /api/search`. Uses `safe_run_async()` to execute coroutines cleanly even when an event loop is already active.
+- **Vercel Serverless Demo (`demo/`)**: Packages the Flask app under `demo/api/index.py` and static assets under `demo/public/`. Synchronized from the primary package via `make sync-demo`. Accepts per-request credentials via `X-OpenAI-Api-Key`, `X-OpenAI-Base-Url`, `X-Groq-Api-Key`, and `X-Github-Token` headers.
+- **Terminal Renderer (`gitradar/utils/ui.py`)**: Built with `rich`. Formats query strategies, repository ranking tables, saturation gauges, and implementation guides.
 
-### 2. Service Layer & Resiliency
-- **GitHub Service (`gitradar/services/github.py`)**: Asynchronous HTTP client built with `httpx`. Executes concurrent keyword/topic searches via `asyncio.gather`, deduplicates repositories, handles rate limiting (HTTP 403), and enriches top candidates with README snippets. Accepts per-request user GitHub tokens.
-- **LLM Service (`gitradar/services/llm.py`)**: Direct OpenAI-compatible standard integration (`openai.OpenAI`). Features:
-  - **Universal Connection Schema**: Connects via `api_key`, `base_url`, and `model` to any OpenAI-compliant provider (OpenAI, Groq, DeepSeek, OpenRouter, Ollama, vLLM).
-  - **Automatic Groq Detection**: If `gsk_...` key is provided or `GROQ_API_KEY` is present, automatically configures `base_url="https://api.groq.com/openai/v1"` and defaults to `llama-3.3-70b-versatile` for 100% backward compatibility.
-  - **Dynamic Model Discovery**: Interrogates `client.models.list()` to discover available models.
-  - **Fallback Execution**: Automatically tries primary model -> fallback models.
-  - **Dual Mode JSON Handling**: Tries `response_format={"type": "json_object"}` first; if rejected by provider server-side validation, retries in standard completion mode and parses content using `extract_json()`.
+### 2. Service Layer
+- **GitHub Service (`gitradar/services/github.py`)**:
+  - Executes parallel `GET /search/repositories` queries across expanded keywords and filtered topics via `asyncio.gather()`.
+  - Deduplicates repositories by `full_name` and sorts initial candidates by `(stars, forks, full_name)`.
+  - Fetches raw README excerpts (`first 800 characters`) for the top 5 repositories via `GET /repos/{owner}/{repo}/readme`.
+  - Computes hybrid relevance scores and enforces minimum relevance filtering in `rank_and_sort_by_relevance()`.
+- **LLM Service (`gitradar/services/llm.py`)**:
+  - Wraps `openai.OpenAI` with automatic endpoint routing: keys prefixed with `gsk_` or configured via `GROQ_API_KEY` automatically target `https://api.groq.com/openai/v1` and default to `llama-3.3-70b-versatile`.
+  - Allows keyless execution when `base_url` targets `localhost`, `127.0.0.1`, or `0.0.0.0` for local inference servers (Ollama, vLLM, LM Studio).
+  - Implements multi-model fallback chains and dual-mode JSON completion (`response_format={"type": "json_object"}` followed by raw text extraction via `extract_json()`).
 
-### 3. Data Models (`gitradar/models.py`)
-- **`RepositoryInfo`**: Summary schema for GitHub repositories.
-- **`ExpandedQueries`**: LLM-derived search strategy.
-- **`CompetitorSummary`**: Competitor strengths and gap profiles.
-- **`OpenSourceTool`**: Recommended open-source library/tool (`name`, `category`, `description_and_usage`, `repo_url`).
-- **`ImplementationGuide`**: Architecture overview, recommended tech stack, and open-source building blocks.
-- **`GapAnalysisReport`**: Full executive gap report schema containing market saturation, opportunity score, unmet needs, differentiators, recommendations, and implementation roadmap.
+### 3. Data Schemas (`gitradar/models.py`)
+
+| Model | Primary Fields | Purpose |
+| :--- | :--- | :--- |
+| `RepositoryInfo` | `full_name`, `stars`, `forks`, `topics`, `readme_snippet`, `relevance_score`, `hybrid_score` | Normalized GitHub repository metadata and relevance scoring metrics |
+| `ExpandedQueries` | `search_keywords`, `github_topics`, `target_languages`, `search_explanation` | LLM-derived search query strategy |
+| `CompetitorSummary` | `repo_name`, `key_strengths`, `weaknesses_or_gaps` | Per-repository competitive analysis |
+| `OpenSourceTool` | `name`, `category`, `description_and_usage`, `repo_url` | Recommended open-source package or library |
+| `ImplementationGuide` | `recommended_tech_stack`, `architecture_overview`, `open_source_building_blocks` | Actionable architecture blueprint for building the project |
+| `GapAnalysisReport` | `idea_summary`, `market_saturation`, `saturation_score`, `opportunity_score`, `top_competitors`, `unmet_needs`, `differentiators`, `actionable_recommendations`, `implementation_guide` | Complete market and gap report returned to CLI and Web UI |
 
 ### 4. Prompt Engine (`gitradar/prompts/`)
-- Uses `jinja2.Environment` and `FileSystemLoader`.
-- Decouples prompt engineering from Python code.
-- Templates:
-  - `query_expansion_system.j2` / `query_expansion_user.j2`
-  - `gap_analysis_system.j2` / `gap_analysis_user.j2`
+Uses `jinja2.Environment` with `FileSystemLoader` across three template pairs:
+- `query_expansion_system.j2` and `query_expansion_user.j2`
+- `relevance_evaluation_system.j2` and `relevance_evaluation_user.j2`
+- `gap_analysis_system.j2` and `gap_analysis_user.j2`
 
 ---
 
-## 🔄 End-to-End Sequence Flow
+## End-to-End Sequence Flow
 
 ```mermaid
 sequenceDiagram
@@ -101,37 +111,58 @@ sequenceDiagram
     participant App as CLI / Web UI / Vercel
     participant LLM as LLMService
     participant GH as GitHubService
-    participant AI as OpenAI / Compatible API
+    participant AI as OpenAI-Compatible API
     participant GHREST as GitHub REST API
 
-    User->>App: Input idea prompt & language choice
+    User->>App: Submit project idea, limit, min_relevance, language
     App->>LLM: expand_idea_to_queries(idea, language)
-    LLM->>AI: Render Jinja2 prompt with language & query LLM (JSON mode)
-    AI-->>LLM: JSON (keywords, topics, strategy explanation)
-    LLM-->>App: ExpandedQueries object
-    
-    App->>GH: search_and_enrich(keywords, topics)
-    GH->>GHREST: GET /search/repositories (Parallel)
-    GHREST-->>GH: Raw repo metadata
-    GH->>GHREST: GET /repos/{owner}/{repo}/readme
-    GHREST-->>GH: README snippets
+    LLM->>AI: Chat completion (query_expansion_*.j2)
+    AI-->>LLM: JSON search strategy
+    LLM-->>App: ExpandedQueries
+
+    App->>GH: search_and_enrich(keywords, topics, limit)
+    GH->>GHREST: Parallel GET /search/repositories
+    GHREST-->>GH: Candidate repository items
+    GH->>GHREST: Parallel GET /repos/{owner}/{repo}/readme (top 5)
+    GHREST-->>GH: Raw README excerpts
     GH-->>App: Enriched RepositoryInfo list
-    
+
+    App->>LLM: evaluate_repository_relevance(idea, candidate_repos, language)
+    LLM->>AI: Chat completion (relevance_evaluation_*.j2)
+    AI-->>LLM: JSON per-repo relevance scores & reasons
+    LLM-->>App: Scored RepositoryInfo list
+
+    App->>GH: rank_and_sort_by_relevance(evaluated_repos, limit, min_relevance)
+    GH-->>App: Filtered & hybrid-ranked RepositoryInfo list
+
     App->>LLM: analyze_market_and_gaps(idea, repos, language)
-    LLM->>AI: Render Jinja2 gap template with language & query LLM
-    AI-->>LLM: JSON Gap Report (with Implementation Guide)
-    LLM-->>App: GapAnalysisReport object
-    App-->>User: Render Rich Terminal / Web Dashboard / Export (.md, .json)
+    LLM->>AI: Chat completion (gap_analysis_*.j2)
+    AI-->>LLM: JSON GapAnalysisReport
+    LLM-->>App: GapAnalysisReport
+    App-->>User: Render terminal output or web dashboard report
 ```
 
 ---
 
-## 🛡️ Error & Exception Matrix
+## Hybrid Relevance Scoring Formula
 
-| Failure Mode | Component | Handling & Fallback Strategy |
-| --- | --- | --- |
-| Missing AI API Key | `LLMService` | Friendly `ValueError` guiding user to `gitradar config --openai-api-key` or browser Settings modal. |
-| Authentication Error | `LLMService` | Catches `AuthenticationError` and prompts user with clear provider and key guidance. |
-| GitHub API Rate Limit (HTTP 403) | `GitHubService` | Catches status code and prompts user to set `GITHUB_TOKEN`. |
-| Server-side JSON Validate Failed | `LLMService` | Retries without `response_format` constraint and uses robust `extract_json()` regex parser. |
+To prevent high-star but tangentially related repositories from crowding out direct competitors, `GitHubService.rank_and_sort_by_relevance` calculates a composite `hybrid_score` on a `0` to `100` scale:
 
+$$\text{star\_score} = \min\left(100.0, \frac{\log_{10}(\text{stars} + 1)}{\log_{10}(\max(\text{max\_stars}, 10) + 1)} \times 100.0\right)$$
+
+$$\text{hybrid\_score} = \text{round}\left(0.7 \times \text{relevance\_score} + 0.3 \times \text{star\_score}, 1\right)$$
+
+Repositories with `relevance_score < min_relevance` are removed. If no repository satisfies `min_relevance`, a fallback threshold of `max(30, min_relevance - 20)` is applied before sorting descending by `(hybrid_score, stars, forks, full_name)`.
+
+---
+
+## Error and Exception Matrix
+
+| Failure Mode | Component | Handling Strategy |
+| :--- | :--- | :--- |
+| Missing AI API key on remote endpoint | `LLMService._ensure_api_key` | Raises `ValueError` instructing the user to run `gitradar config --openai-api-key` or populate the Web UI Settings modal. |
+| Invalid or expired AI API key (`401`) | `LLMService._completion_with_fallback` | Catches `AuthenticationError` immediately without retrying fallback models and raises a descriptive `ValueError`. |
+| Provider rejects `response_format` JSON mode | `LLMService._completion_with_fallback` | Retries completion without `response_format`, strips `<think>` tags and code fences, and parses via `extract_json()`. |
+| Trailing commas in LLM JSON output | `extract_json` | Applies regex sanitization `re.sub(r",\s*([\}\]])", r"\1", cleaned)` before re-parsing with `json.loads()`. |
+| GitHub REST API rate limit exceeded (`403`) | `GitHubService.search_repositories` | Raises `RuntimeError` instructing the user to configure `GITHUB_TOKEN`. |
+| Active asyncio event loop in web server | `gitradar.web.app.safe_run_async` | Detects running event loop via `asyncio.get_running_loop()` and dispatches coroutine execution to a single-worker `ThreadPoolExecutor`. |

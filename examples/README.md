@@ -1,33 +1,36 @@
-# GitRadar Examples & Integration Guides 📚
+[← Back to Root Repository](../README.md)
 
-This directory contains practical examples, sample output files, Python integration scripts, and shell automation scripts demonstrating how to use **GitRadar**.
+# GitRadar Examples and Automation Recipes (`examples/`)
 
----
+Runnable Python SDK scripts, shell batch pipelines, and sample output schemas for integrating GitRadar into local workflows or CI jobs.
 
-## 📂 Contents
+## Contents
 
-| File | Description |
-| --- | --- |
-| [`python_sdk_usage.py`](./python_sdk_usage.py) | Python script showing how to import and use GitRadar services directly in custom Python applications. |
-| [`batch_analyze_ideas.sh`](./batch_analyze_ideas.sh) | Shell script to batch-analyze multiple software project ideas in sequence. |
-| [`ci_market_check.sh`](./ci_market_check.sh) | Example CI script for automated market analysis checks. |
-| [`sample_gap_report.json`](./sample_gap_report.json) | Example JSON schema output of a full Market & Gap Analysis Report. |
+| File | Type | Description |
+| :--- | :--- | :--- |
+| [`python_sdk_usage.py`](./python_sdk_usage.py) | Python Script | Imports `GitHubService` and `LLMService` directly to run programmatic gap analysis. |
+| [`batch_analyze_ideas.sh`](./batch_analyze_ideas.sh) | POSIX Shell | Sequentially analyzes an array of software project concepts via `gitradar analyze`. |
+| [`ci_market_check.sh`](./ci_market_check.sh) | POSIX Shell | Executes automated repository search and market checks inside CI environments. |
+| [`sample_gap_report.json`](./sample_gap_report.json) | JSON Artifact | Sample serialized `GapAnalysisReport` output payload. |
 
----
+## Prerequisites
 
-## 🚀 Running the Examples
-
-### 1. Python SDK Example
-
-Ensure GitRadar and dependencies are installed in your environment, then run:
+Install `gitradar` in editable mode from the repository root and configure an API key:
 
 ```bash
-python examples/python_sdk_usage.py
+pip install -e ".[dev]"
+gitradar config --openai-api-key "sk-your_api_key_here"
 ```
 
-### 2. Batch Analysis Shell Script
+## Usage
 
-Make the script executable and run:
+### 1. Python SDK Script
+
+```bash
+python3 examples/python_sdk_usage.py
+```
+
+### 2. Batch Analysis Script
 
 ```bash
 chmod +x examples/batch_analyze_ideas.sh
@@ -38,5 +41,5 @@ chmod +x examples/batch_analyze_ideas.sh
 
 ```bash
 chmod +x examples/ci_market_check.sh
-./examples/ci_market_check.sh "AI powered git commit message generator"
+./examples/ci_market_check.sh "AI git commit message linter"
 ```

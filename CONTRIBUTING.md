@@ -1,83 +1,93 @@
-# Contributing to GitRadar 📡
+# Contributing to GitRadar
 
-Thank you for your interest in contributing to **GitRadar**! We welcome contributions from developers of all skill levels. Whether you are fixing a bug, adding new prompt templates, building Web UI components, or improving documentation, your efforts are appreciated.
+This document defines the development environment setup, validation requirements, and commit conventions for contributing to GitRadar.
 
----
+## Table of Contents
 
-## 📜 Code of Conduct
+- [Code of Conduct](#code-of-conduct)
+- [Development Setup](#development-setup)
+- [Test and Verification Suite](#test-and-verification-suite)
+- [Subsystem Extension Guides](#subsystem-extension-guides)
+- [Conventional Commits](#conventional-commits)
+- [Pull Request Checklist](#pull-request-checklist)
 
-By participating in this project, you agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md). Please ensure respectful and constructive communication in all interactions.
+## Code of Conduct
 
----
+All contributors must adhere to the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-## 🛠️ Development Setup
+## Development Setup
 
-### 1. Fork & Clone the Repository
+### 1. Fork and Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/GitRadar.git
+git clone https://github.com/AtaCanYmc/GitRadar.git
 cd GitRadar
 ```
 
-### 2. Create & Activate Virtual Environment
+### 2. Virtual Environment and Dependencies
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-### 3. Install Editable Package with Dev Dependencies
-
-```bash
+source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
----
-
-## 🧪 Running Tests & Validation
-
-Ensure all unit tests pass before submitting a Pull Request:
+Or use the `Makefile` target:
 
 ```bash
-pytest
+make venv
+make install
 ```
 
----
+## Test and Verification Suite
 
-## 💡 Adding New Prompt Templates
+Run the unit and integration test suite before opening a pull request:
 
-GitRadar decouples LLM prompt logic into Jinja2 templates:
-1. Add or edit `.j2` template files in `gitradar/prompts/`.
-2. Add a corresponding test case in `tests/test_prompts.py` to verify template rendering.
+```bash
+pytest -v
+```
 
----
+If you modify files under `gitradar/` or `gitradar/web/`, synchronize the Vercel serverless bundle in `demo/`:
 
-## 🌐 Extending the Web Dashboard
+```bash
+make sync-demo
+```
 
-The web dashboard is powered by Flask:
-1. Backend routes are located in `gitradar/web/app.py`.
-2. HTML templates are in `gitradar/web/templates/`.
-3. Static CSS and JS assets are in `gitradar/web/static/`.
-4. Add route tests in `tests/test_web.py`.
+## Subsystem Extension Guides
 
----
+### Prompt Templates (`gitradar/prompts/`)
 
-## 📝 Conventional Commit Format
+Prompt logic is decoupled from Python orchestration using Jinja2 templates:
 
-GitRadar uses **Release Please** for automated release management. All commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+1. Create or update `.j2` template files in `gitradar/prompts/`.
+2. Verify prompt interpolation and schema output in `tests/test_prompts.py`.
 
-- `feat(cli): add new interactive option` (Minor release bump `0.1.0` -> `0.2.0`)
-- `fix(llm): resolve fallback model parsing error` (Patch release bump `0.1.0` -> `0.1.1`)
-- `docs(readme): update architectural diagram`
-- `chore(deps): update litellm dependency`
+### Web Dashboard (`gitradar/web/` and `demo/`)
 
----
+The local web interface and Vercel demo share core Flask endpoints and frontend assets:
 
-## 🔄 Pull Request Guidelines
+1. Edit backend routes in `gitradar/web/app.py`.
+2. Edit HTML templates in `gitradar/web/templates/index.html` and static assets in `gitradar/web/static/`.
+3. Run `make sync-demo` to propagate changes into `demo/`.
+4. Add or update route tests in `tests/test_web.py`.
 
-1. Create a descriptive feature branch (`git checkout -b feature/your-feature-name`).
-2. Keep commits atomic with conventional commit messages.
-3. Verify test suite passes (`pytest`).
-4. Submit your Pull Request targeting the `main` branch.
+## Conventional Commits
 
-Happy Coding! 🚀
+GitRadar uses Release Please for automated semantic versioning and PyPI publishing. Commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+| Prefix | Version Impact | Purpose |
+| :--- | :--- | :--- |
+| `feat(scope):` | Minor (`0.1.x` -> `0.2.0`) | New CLI command, API endpoint, or prompt pipeline stage |
+| `fix(scope):` | Patch (`0.1.5` -> `0.1.6`) | Bug fix, error handling refinement, or schema correction |
+| `docs(scope):` | None | Documentation and governance updates |
+| `refactor(scope):` | None | Internal code restructuring with no behavior change |
+| `test(scope):` | None | Test suite additions or fixture updates |
+| `chore(scope):` | None | Build scripts, CI workflows, or dependency updates |
+
+## Pull Request Checklist
+
+1. Create a topic branch from `main` (`git checkout -b feat/short-description`).
+2. Keep commits atomic and formatted according to Conventional Commits.
+3. Run `pytest` and verify all test modules pass.
+4. Run `make sync-demo` if core package or web assets changed.
+5. Open a pull request against `main` with verification output attached.

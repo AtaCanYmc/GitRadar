@@ -8,7 +8,7 @@ version = "0.1.5"
 description = "CLI tool for GitHub market & gap analysis using LLM and GitHub REST API"
 readme = "README.md"
 authors = [
-    { name = "GitRadar Developer", email = "developer@example.com" }
+    { name = "AtaCanYmc", email = "atacanymc@gmail.com" }
 ]
 requires-python = ">=3.10"
 dependencies = [

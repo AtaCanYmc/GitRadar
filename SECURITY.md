@@ -1,24 +1,31 @@
-# Security Policy 🛡️
+# Security Policy
 
 ## Supported Versions
 
-Only the latest release of GitRadar is currently supported for security updates.
+Security patches are applied to the latest minor release track on the `main` branch.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < 0.1.0 | :x:                |
+| Version | Supported | Status |
+| :--- | :---: | :--- |
+| `0.1.x` | Yes | Active maintenance |
+| `< 0.1.0` | No | End of life |
 
 ## Reporting a Vulnerability
 
-We take the security of GitRadar seriously. If you suspect or find a security vulnerability (such as sensitive token leak in logs, API key exposure, or unsafe dependencies), please follow these guidelines:
+Do not open a public GitHub issue for security vulnerabilities such as credential exposure, injection flaws, or unsafe dependencies.
 
-1. **Do NOT open a public GitHub issue** to report security vulnerabilities.
-2. Email your findings directly to `security@example.com` or contact the maintainers via private GitHub security advisories.
-3. Include detailed steps to reproduce the issue, along with any relevant proof-of-concept scripts or logs.
+1. Submit a private report via [GitHub Security Advisories](https://github.com/AtaCanYmc/GitRadar/security/advisories/new) or email `atacanymc@gmail.com`.
+2. Include reproduction commands, affected file paths, environment configuration, and proof-of-concept logs.
+3. Allow maintainers to remediate the defect before public disclosure.
 
-### Response Timeline
+## Response SLA
 
-- **Initial Response**: Within 48 hours.
-- **Status Update**: Within 7 business days with an assessment and remediation plan.
-- **Public Disclosure**: Coordinated disclosure after a patch has been released.
+| Milestone | Target SLA |
+| :--- | :--- |
+| Initial acknowledgment | Within 48 hours |
+| Triage and severity assessment | Within 7 business days |
+| Patch release and coordinated advisory | Upon verification of fix |
+
+## Credential Handling Architecture
+
+- **Local CLI and Web Server**: Credentials persisted via `gitradar config` are written only to `~/.config/gitradar/config.env` outside the repository tree.
+- **Serverless Web Demo (`demo/`)**: User API keys are stored in browser `localStorage` and forwarded per request via HTTPS headers (`X-OpenAI-Api-Key`, `X-Groq-Api-Key`, `X-Github-Token`). Keys are never logged or persisted server-side.

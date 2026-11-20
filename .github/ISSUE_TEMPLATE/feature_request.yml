@@ -1,0 +1,39 @@
+name: Feature Request
+description: Propose a new CLI command, prompt pipeline improvement, or Web UI capability
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check existing issues and [ROADMAP.md](../../ROADMAP.md) to verify this proposal is not already tracked.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Describe the technical limitation or workflow friction this feature resolves.
+      placeholder: When analyzing repositories with...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Detail the requested CLI flags, API schema, or UI changes.
+      placeholder: Add support for...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative approaches or workarounds considered.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Contributor Checklist
+      options:
+        - label: I searched existing issues, PRs, and ROADMAP.md before submitting this request.
+          required: true
+        - label: This proposal aligns with GitRadar's technical scope and governance standards.
+          required: true

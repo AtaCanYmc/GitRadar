@@ -1,0 +1,50 @@
+name: Bug Report
+description: Report a reproducible defect in the CLI, Web UI, or Python SDK
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Verify the issue has not already been reported before opening a new ticket.
+        For security vulnerability reports, refer to [SECURITY.md](../../SECURITY.md).
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug Description
+      description: Provide a clear and concise description of the defect.
+      placeholder: Describe what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact commands or steps to reproduce the behavior.
+      placeholder: |
+        1. Run `gitradar analyze "..."`
+        2. Inspect terminal or HTTP output
+        3. Observe error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or Stack Trace
+      description: Paste relevant terminal output or stack traces (redact API keys).
+      render: shell
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS version, Python version, GitRadar version, and LLM provider.
+      placeholder: macOS 15, Python 3.12, gitradar 0.1.5, Groq / OpenAI
+    validations:
+      required: true
